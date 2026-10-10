@@ -18,3 +18,5 @@ The Endcord developer table supplies a fallback Discord ID for unknown authors. 
 CustomProfile was rewritten for EqyCord's APIs and lifecycle. It does not use Endcord's remote profile backend or donor-badge cache. Custom styles are separate from real Discord badges. The gifting-image URLs owned by Endcord were excluded; the shared badge selector uses the source's Discord CDN icons for the supported styles.
 
 Existing Vencord and Equicord notices and licenses remain applicable to their original code.
+
+The community cards reuse the SpecialCard layout shared by Vencord and Endcord, with their Discord CDN decorative sticker backgrounds and donation/contribution illustrations. Original component notices remain intact. The Plugin Innovator illustration is EqyCord's existing badge SVG. References: https://github.com/rootpoii/endcord and https://github.com/Vencord/Vencord/tree/main/src/components/settings .

@@ -22,7 +22,7 @@ import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
 import { classNameFactory } from "@utils/css";
 import { Clickable, Forms } from "@webpack/common";
-import type { PropsWithChildren } from "react";
+import type { PropsWithChildren, ReactNode } from "react";
 
 const cl = classNameFactory("vc-special-");
 
@@ -33,7 +33,7 @@ interface StyledCardProps {
     cardImage?: string;
     backgroundImage?: string;
     backgroundColor?: string;
-    buttonTitle?: string;
+    buttonTitle?: ReactNode;
     buttonOnClick?: () => void;
 }
 

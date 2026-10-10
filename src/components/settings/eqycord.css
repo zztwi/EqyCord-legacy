@@ -4,23 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-.eqycord-settings-brand {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px 16px;
-    margin-bottom: 24px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid var(--text-link);
-    color: var(--text-primary);
-    font-family: var(--font-display);
-
-    & span {
-        color: var(--text-secondary);
-        font-size: 12px;
-    }
-}
-
 .eqycord-settings-tab .vc-addon-card {
     border-radius: 12px;
 }

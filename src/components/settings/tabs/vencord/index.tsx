@@ -123,13 +123,6 @@ function Switches() {
 function VencordSettings() {
     return (
         <SettingsTab>
-            <section className={Margins.bottom20}>
-                <Forms.FormTitle tag="h3">EqyCord</Forms.FormTitle>
-                <Forms.FormText>
-                    Customize your Discord experience with plugins, themes and EqyCord settings.
-                </Forms.FormText>
-            </section>
-
             <CommunityCards />
 
             <section>
