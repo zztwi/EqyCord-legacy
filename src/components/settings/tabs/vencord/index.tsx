@@ -21,6 +21,7 @@ import { useSettings } from "@api/Settings";
 import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
 import { FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "@components/Icons";
+import { CommunityCards } from "@components/settings/CommunityCards";
 import { QuickAction, QuickActionCard } from "@components/settings/QuickAction";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { openPluginModal } from "@components/settings/tabs/plugins/PluginModal";
@@ -128,6 +129,8 @@ function VencordSettings() {
                     Customize your Discord experience with plugins, themes and EqyCord settings.
                 </Forms.FormText>
             </section>
+
+            <CommunityCards />
 
             <section>
                 <Forms.FormTitle tag="h5">Quick Actions</Forms.FormTitle>

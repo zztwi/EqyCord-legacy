@@ -1,0 +1,69 @@
+.eqy-community-cards {
+    margin: 20px 0 24px;
+    font-family: var(--font-primary);
+
+    & .vc-special-card-special {
+        border: 1px solid rgb(0 0 0 / 8%);
+        border-radius: 12px;
+        padding: 20px 24px;
+    }
+
+    & .vc-special-title,
+    & .vc-special-subtitle,
+    & .vc-special-text {
+        color: #23252a;
+    }
+
+    & .vc-special-title {
+        font-size: 18px;
+        font-weight: 700;
+    }
+
+    & .vc-special-subtitle {
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    & .vc-special-text {
+        font-size: 14px;
+        line-height: 1.55;
+    }
+}
+
+.eqy-community-requirement {
+    color: #23252a;
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 12px 0 0;
+}
+
+.eqy-community-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    margin-right: 8px;
+    padding: 8px 12px;
+    border: 1px solid rgb(0 0 0 / 12%);
+    border-radius: 8px;
+    color: #23252a;
+    background: rgb(255 255 255 / 35%);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+        background: rgb(255 255 255 / 60%);
+    }
+
+    &:focus-visible {
+        outline: 2px solid #23252a;
+        outline-offset: 3px;
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+}
