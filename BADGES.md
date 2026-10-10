@@ -4,7 +4,7 @@ EqyCord Staff (crossed tools) and EqyCord Creator (blue seal with white check) a
 
 The required BadgeAPI includes these badges automatically. No optional plugin, network request, token, or local account setting is needed. Any user running this build can see the badges on either assigned profile. Vanilla Discord and older builds without the assignments do not display them.
 
-Assignments live in src/shared/eqycordBadges.ts; profile integration lives in src/api/eqycordBadges.ts. Changes to the bundled list require an updated build. This is not a hosted, live-updating badge service.
+Assignments live in src/shared/eqycordBadgeAssignments.json; profile integration lives in src/api/eqycordBadges.ts. Changes to the bundled list require an updated build. This is not a hosted, live-updating badge service.
 
 The symbols identify roles in EqyCord; no official Discord account flags are changed. Tooltips are EqyCord Staff and EqyCord Creator.
 
