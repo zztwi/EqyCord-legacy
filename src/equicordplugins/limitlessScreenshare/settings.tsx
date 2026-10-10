@@ -27,7 +27,7 @@ export const settings = definePluginSettings({
     },
     maxResolution: {
         description: "Max Resolution for the range slider",
-        default: 1080,
+        default: 2160,
         type: OptionType.NUMBER,
         isValid: (value: number) => {
             if (value < MIN_RESOLUTION) return `Max resolution cannot be lower than ${MIN_RESOLUTION}`;
@@ -48,12 +48,12 @@ export const settings = definePluginSettings({
         type: OptionType.CUSTOM,
         description: "",
         hidden: true,
-        default: [{ label: "480p", value: 480 }, { label: "720p", value: 720 }, { label: "1080p", value: 1080 }, { label: "1440p", value: 1440 }, { label: "Source", value: 0 }],
+        default: [{ label: "480p", value: 480 }, { label: "720p", value: 720 }, { label: "1080p", value: 1080 }, { label: "1440p", value: 1440 }, { label: "2160p (4K)", value: 2160 }, { label: "Source", value: 0 }],
     },
     fpss: {
         type: OptionType.CUSTOM,
         description: "",
         hidden: true,
-        default: [{ label: "15fps", value: 15 }, { label: "30fps", value: 30 }, { label: "60fps", value: 60 }],
+        default: [{ label: "15fps", value: 15 }, { label: "30fps", value: 30 }, { label: "60fps", value: 60 }, { label: "120fps", value: 120 }],
     },
 });
