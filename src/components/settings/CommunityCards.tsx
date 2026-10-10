@@ -28,6 +28,23 @@ function DiscordLink() {
     return <button type="button" className="eqy-community-link" onClick={() => VencordNative.native.openExternal(community.discordUrl)}><DiscordLabel /></button>;
 }
 
+function SupportIllustration() {
+    return (
+        <svg className="eqy-support-illustration" width="76" height="76" viewBox="0 0 80 80" aria-hidden="true">
+            <circle cx="40" cy="40" r="32" fill="#edf4ff" />
+            <g className="eqy-support-heart">
+                <path d="M40 49 24 34c-12-12 5-26 16-13 11-13 28 1 16 13Z" fill="#5482de" />
+                <path d="M29 27c0-4 4-6 7-3" fill="none" stroke="#c8dcff" strokeWidth="3" strokeLinecap="round" />
+            </g>
+            <path d="m17 48 10 9h26l10-9M27 57l7 6h12l7-6" fill="none" stroke="#294c86" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+            <g className="eqy-support-sparkle" fill="#8baded">
+                <path d="m64 18 2 5 5 2-5 2-2 5-2-5-5-2 5-2Z" />
+                <circle cx="15" cy="35" r="2.5" />
+            </g>
+        </svg>
+    );
+}
+
 export function CommunityCards() {
     const userId = useStateFromStores([UserStore], () => UserStore.getCurrentUser()?.id);
     const contributor = hasEqyCordBadge(userId, "contributor");
@@ -37,9 +54,9 @@ export function CommunityCards() {
     return (
         <section className="eqy-community-cards" aria-label="Support and community recognition">
             <SpecialCard
-                backgroundColor="#c3a3ce"
+                backgroundColor="#bfd3ee"
                 backgroundImage="https://media.discordapp.net/stickers/1311070116305436712.png?size=2048"
-                cardImage="https://media.discordapp.net/stickers/1039992459209490513.png"
+                cardIllustration={<SupportIllustration />}
                 title="Support the Project"
                 description={donationUrl
                     ? "Please consider supporting the development of EqyCord by donating!"

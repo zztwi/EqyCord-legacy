@@ -31,13 +31,14 @@ interface StyledCardProps {
     subtitle?: string;
     description: string;
     cardImage?: string;
+    cardIllustration?: ReactNode;
     backgroundImage?: string;
     backgroundColor?: string;
     buttonTitle?: ReactNode;
     buttonOnClick?: () => void;
 }
 
-export function SpecialCard({ title, subtitle, description, cardImage, backgroundImage, backgroundColor, buttonTitle, buttonOnClick: onClick, children }: PropsWithChildren<StyledCardProps>) {
+export function SpecialCard({ title, subtitle, description, cardImage, cardIllustration, backgroundImage, backgroundColor, buttonTitle, buttonOnClick: onClick, children }: PropsWithChildren<StyledCardProps>) {
     const cardStyle: React.CSSProperties = {
         backgroundColor: backgroundColor || "#9c85ef",
         backgroundImage: `url(${backgroundImage || ""})`,
@@ -53,14 +54,14 @@ export function SpecialCard({ title, subtitle, description, cardImage, backgroun
 
                     {children}
                 </div>
-                {cardImage && (
+                {(cardIllustration || cardImage) && (
                     <div className={cl("image-container")}>
-                        <img
+                        {cardIllustration || <img
                             role="presentation"
                             src={cardImage}
                             alt=""
                             className={cl("image")}
-                        />
+                        />}
                     </div>
                 )}
             </div>
