@@ -225,6 +225,83 @@
     opacity: 1;
 }
 
+.eqy-badge-choices {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    min-width: 0;
+    margin: 20px 0 0;
+    padding: 0;
+    border: 0;
+}
+
+.eqy-badge-choices legend {
+    margin-bottom: 10px;
+    padding: 0;
+    color: var(--eqy-tool-text);
+    font-weight: 600;
+}
+
+.eqy-tweak-panel label.eqy-badge-choice {
+    position: relative;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    padding: 14px;
+    border: 1px solid var(--eqy-tool-border);
+    border-radius: 8px;
+    background: var(--eqy-tool-field);
+    color: var(--eqy-tool-text);
+    cursor: pointer;
+}
+
+.eqy-tweak-panel label.eqy-badge-choice:has(input:checked) {
+    border-color: #949cf7;
+    box-shadow: inset 0 0 0 1px #949cf7;
+}
+
+.eqy-badge-choice:has(input:focus-visible) {
+    outline: 2px solid #949cf7;
+    outline-offset: 3px;
+}
+
+.eqy-badge-choices:disabled .eqy-badge-choice {
+    cursor: not-allowed;
+}
+
+.eqy-tweak-panel .eqy-badge-choice input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    min-height: 0;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.eqy-badge-choice strong {
+    display: block;
+    font-weight: 600;
+}
+
+.eqy-badge-choice small {
+    display: block;
+    margin-top: 3px;
+    color: var(--eqy-tool-muted);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.4;
+}
+
+.eqy-badge-choice-check {
+    min-width: 18px;
+    margin-left: auto;
+    color: var(--eqy-tool-text);
+    font-size: 18px;
+}
+
 .eqy-tweak-panel .eqy-tweak-status {
     padding: 12px;
     border-radius: 6px;
