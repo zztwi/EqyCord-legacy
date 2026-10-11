@@ -12,6 +12,7 @@ interface Env {
     DISCORD_CLIENT_ID: string;
     DISCORD_CLIENT_SECRET: string;
     PUBLIC_ORIGIN: string;
+    BADGE_OWNER_ID?: string;
 }
 const allowedOrigins = new Set(["https://discord.com", "https://canary.discord.com", "https://ptb.discord.com"]);
 const b64 = (bytes: Uint8Array) => btoa(String.fromCharCode(...bytes)).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
@@ -45,6 +46,11 @@ async function route(request: Request, env: Env): Promise<Response> {
     if (!origin || !isDiscordId(env.DISCORD_CLIENT_ID) || !env.DISCORD_CLIENT_SECRET) return json({ error: "Service not configured" }, 503);
     const now = Date.now();
     const ip = request.headers.get("CF-Connecting-IP") ?? "local";
+    if (url.pathname === "/badges" && request.method === "GET") {
+        if (await limited(env, `badges:${ip}`, 60, now)) return json({ error: "Please try again later" }, 429);
+        const rows = await env.DB.prepare("SELECT user_id,badge FROM badges ORDER BY user_id LIMIT 5000").all<{ user_id: string; badge: string }>();
+        return json({ contributor: rows.results.filter(x => x.badge === "contributor").map(x => x.user_id), innovator: rows.results.filter(x => x.badge === "innovator").map(x => x.user_id) });
+    }
     if (url.pathname.startsWith("/auth/") && await limited(env, `auth:${ip}`, 30, now)) return json({ error: "Please try again later" }, 429);
 
     if (url.pathname === "/auth/start" && request.method === "POST") {
@@ -99,6 +105,20 @@ async function route(request: Request, env: Env): Promise<Response> {
     const auth = await session(request, env, now);
     if (!auth) return json({ error: "Connect your Discord account first" }, 401);
     if (await limited(env, `user:${auth.user_id}`, 120, now)) return json({ error: "Please try again later" }, 429);
+    if (url.pathname === "/admin/badges") {
+        if (!isDiscordId(env.BADGE_OWNER_ID) || auth.user_id !== env.BADGE_OWNER_ID) return json({ error: "Owner access required" }, 403);
+        if (request.method === "GET") return json({ owner: true });
+        if (request.method !== "PUT" && request.method !== "DELETE") return json({ error: "Method not allowed" }, 405);
+        const data = await body(request);
+        if (!isDiscordId(data.userId) || !["contributor", "innovator"].includes(data.badge)) return json({ error: "Invalid badge assignment" }, 400);
+        await env.DB.batch([
+            request.method === "PUT"
+                ? env.DB.prepare("INSERT INTO badges(user_id,badge,assigned_by,updated_at) VALUES (?,?,?,?) ON CONFLICT(user_id,badge) DO UPDATE SET assigned_by=excluded.assigned_by,updated_at=excluded.updated_at").bind(data.userId, data.badge, auth.user_id, now)
+                : env.DB.prepare("DELETE FROM badges WHERE user_id=? AND badge=?").bind(data.userId, data.badge),
+            env.DB.prepare("INSERT INTO badge_audit(actor_id,user_id,badge,action,created_at) VALUES (?,?,?,?,?)").bind(auth.user_id, data.userId, data.badge, request.method === "PUT" ? "grant" : "revoke", now)
+        ]);
+        return json({ ok: true });
+    }
     if (url.pathname === "/profiles" && request.method === "GET") {
         const ids = [...new Set((url.searchParams.get("ids") ?? "").split(","))];
         if (ids.length > 50 || ids.some(id => !isDiscordId(id))) return json({ error: "Invalid profile IDs" }, 400);

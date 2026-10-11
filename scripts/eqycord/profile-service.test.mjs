@@ -113,3 +113,23 @@ test("Expired sessions, CORS, malformed requests and sign-in throttling", async 
     assert.equal(last.status, 429);
     db.close();
 });
+
+test("Community badges require verified owner writes, reject staff grants and log revocation", async () => {
+    const { db, env, send, addSession } = fixture();
+    env.BADGE_OWNER_ID = userA;
+    const a = "a".repeat(43), b = "b".repeat(43);
+    addSession(userA, a); addSession(userB, b);
+    const assignment = { userId: userB, badge: "contributor" };
+    assert.equal((await send("/admin/badges", "PUT", assignment)).status, 401);
+    assert.equal((await send("/admin/badges", "PUT", assignment, b)).status, 403);
+    assert.equal((await send("/admin/badges", "PUT", { ...assignment, badge: "staff" }, a)).status, 400);
+    assert.equal((await send("/admin/badges", "PUT", assignment, a)).status, 200);
+    assert.deepEqual(await (await send("/badges")).json(), { contributor: [userB], innovator: [] });
+    assert.equal((await send("/admin/badges", "PUT", { ...assignment, badge: "innovator" }, a)).status, 200);
+    assert.equal((await send("/admin/badges", "DELETE", assignment, a)).status, 200);
+    assert.deepEqual(await (await send("/badges")).json(), { contributor: [], innovator: [userB] });
+    assert.equal(db.prepare("SELECT count(*) AS n FROM badge_audit").get().n, 3);
+    delete env.BADGE_OWNER_ID;
+    assert.equal((await send("/admin/badges", "DELETE", { ...assignment, badge: "innovator" }, a)).status, 403);
+    db.close();
+});

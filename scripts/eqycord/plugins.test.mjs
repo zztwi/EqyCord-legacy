@@ -35,7 +35,7 @@ test("all imported Equicord plugins are registered without duplicate Vencord nam
     const imported = plugins.filter(plugin => plugin.filePath.startsWith("src/equicordplugins/"));
     const upstream = plugins.filter(plugin => !plugin.filePath.startsWith("src/equicordplugins/"));
     const endcordNames = new Set(["QuickDelete", "RemindMe", "AutoReact", "SmoothType", "FakeTag", "FakeConnections", "CustomProfile"]);
-    const newNames = new Set(["FakePlaying", "GhostTyping", "FreezeCam", "FakeLagVoice", "VoiceTroll"]);
+    const newNames = new Set(["FakePlaying", "GhostTyping", "FreezeCam", "FakeLagVoice", "VoiceTroll", "Tweak", "EqyCordBadgeManager"]);
     assert.equal(imported.filter(plugin => !plugin.filePath.startsWith("src/equicordplugins/ghostVoice") && !endcordNames.has(plugin.name) && !newNames.has(plugin.name)).length, 199);
     for (const name of newNames) assert.equal(imported.filter(plugin => plugin.name === name).length, 1, name);
     assert.equal(plugins.some(plugin => plugin.name === "DiscordDevBanner"), false);

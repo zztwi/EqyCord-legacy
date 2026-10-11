@@ -7,7 +7,6 @@ Settings → EqyCord shows independent community cards:
 
 The Contributor and Plugin Innovator badges are independent of Staff, Creator, and the cosmetic CustomProfile badge picker. Neither badge is automatically granted for opening a ticket, submitting ideas, donating, or installing the client.
 
-Official EqyCord assignments are stored in `src/shared/eqycordBadgeAssignments.json`. Add a Discord user ID to `contributor` or `innovator` only after the owner grants that recognition, then rebuild and distribute the updated client. Both lists initially contain no users. Existing Staff and Creator assignments are preserved. These are EqyCord badges, visible to clients with the updated assignments; they do not grant Discord privileges. Bundled assignment changes require a client update; no live badge administration service is configured.
+Staff and Creator assignments remain bundled in `src/shared/eqycordBadgeAssignments.json`. Contributor and Plugin Innovator assignments now live in the profile service database. The owner-only panel beside the navigation arrows requires verified Discord sign-in and is restricted server-side to account `380070146317877249`. Grants and revocations are audited; clients refresh the public badge registry once per minute while visible. A rebuild is no longer required for those two community badges. They do not grant Discord privileges.
 
 The community button opens https://discord.gg/Kexjx2GH3B. PayPal donations are intentionally disabled until the owner provides a payment URL. Configure `donationUrl` in `src/shared/eqycordCommunity.json` when that URL is available. No payment destination or transaction is created automatically.
-

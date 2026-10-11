@@ -1,92 +1,97 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import { fetchBuffer, fetchJson } from "@main/utils/http";
 import { IpcEvents } from "@shared/IpcEvents";
 import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
+import { createHash } from "crypto";
 import { ipcMain } from "electron";
-import { writeFile } from "fs/promises";
-import { join } from "path";
+import { readFile, rename, unlink,writeFile } from "fs/promises";
+import { join, resolve } from "path";
 
 import gitHash from "~git-hash";
-import gitRemote from "~git-remote";
 
 import { serializeErrors, VENCORD_FILES } from "./common";
 
-const API_BASE = `https://api.github.com/repos/${gitRemote}`;
-let PendingUpdates = [] as [string, string][];
-
-async function githubGet<T = any>(endpoint: string) {
-    return fetchJson<T>(API_BASE + endpoint, {
-        headers: {
-            Accept: "application/vnd.github+json",
-            // "All API requests MUST include a valid User-Agent header.
-            // Requests with no User-Agent header will be rejected."
-            "User-Agent": VENCORD_USER_AGENT
-        }
-    });
+const REPO = "zztwi/EqyCord";
+const API_BASE = `https://api.github.com/repos/${REPO}`;
+interface Manifest { commit: string; files: Record<string, string>; }
+let pending: { manifest: Manifest; urls: Record<string, string>; } | undefined;
+const digest = (data: Buffer) => createHash("sha256").update(data).digest("hex");
+async function githubGet(endpoint: string) {
+    return fetchJson<any>(API_BASE + endpoint, { headers: { Accept: "application/vnd.github+json", "User-Agent": VENCORD_USER_AGENT }, signal: AbortSignal.timeout(20000) });
 }
-
-async function calculateGitChanges() {
-    const isOutdated = await fetchUpdates();
-    if (!isOutdated) return [];
-
-    const data = await githubGet(`/compare/${gitHash}...HEAD`);
-
-    return data.commits.map((c: any) => ({
-        // github api only sends the long sha
-        hash: c.sha.slice(0, 7),
-        author: c.author?.login ?? c.commit?.author?.name ?? "Unknown Author",
-        message: c.commit.message.split("\n")[0]
-    }));
+function trusted(url: string) {
+    const parsed = new URL(url);
+    if (parsed.origin !== "https://github.com" || !parsed.pathname.startsWith(`/${REPO}/releases/download/`)) throw new Error("Unexpected release asset origin");
+    return parsed.href;
 }
-
 async function fetchUpdates() {
-    const data = await githubGet("/releases/latest");
-
-    const hash = data.name.slice(data.name.lastIndexOf(" ") + 1);
-    if (hash === gitHash)
-        return false;
-
-    data.assets.forEach(({ name, browser_download_url }) => {
-        if (VENCORD_FILES.some(s => name.startsWith(s))) {
-            PendingUpdates.push([name, browser_download_url]);
-        }
-    });
-
+    pending = undefined;
+    let data: any;
+    try { data = await githubGet("/releases/latest"); }
+    catch (error) { if (String(error).includes("404")) return false; throw error; }
+    if (data.draft || data.prerelease) return false;
+    const urls: Record<string, string> = {};
+    for (const asset of data.assets ?? []) if ([...VENCORD_FILES, "eqycord-update.json"].includes(asset.name)) urls[asset.name] = trusted(asset.browser_download_url);
+    if (!urls["eqycord-update.json"]) throw new Error("Release has no EqyCord update manifest");
+    const manifest = await fetchJson<Manifest>(urls["eqycord-update.json"], { signal: AbortSignal.timeout(20000) });
+    if (!/^[a-f0-9]{40}$/.test(manifest.commit) || !VENCORD_FILES.every(name => /^[a-f0-9]{64}$/.test(manifest.files?.[name]) && urls[name])) throw new Error("Incomplete release manifest");
+    if (manifest.commit.startsWith(gitHash)) return false;
+    const comparison = await githubGet(`/compare/${gitHash}...${manifest.commit}`);
+    if (comparison.status === "behind" || comparison.status === "identical") return false;
+    if (comparison.status !== "ahead") throw new Error("This release does not extend your installed EqyCord build");
+    pending = { manifest, urls };
     return true;
 }
-
+async function changes() {
+    if (!await fetchUpdates()) return [];
+    return [{ hash: pending!.manifest.commit.slice(0, 7), author: "EqyCord", message: "Validated EqyCord release" }];
+}
 async function applyUpdates() {
-    const fileContents = await Promise.all(PendingUpdates.map(async ([name, url]) => {
-        const contents = await fetchBuffer(url);
-        return [join(__dirname, name), contents] as const;
+    if (!pending) throw new Error("Check for updates first");
+    const release = pending;
+    const files = await Promise.all(VENCORD_FILES.map(async name => {
+        const data = await fetchBuffer(release.urls[name], { signal: AbortSignal.timeout(60000) });
+        if (data.length > 25000000 || digest(data) !== release.manifest.files[name]) throw new Error("Update checksum mismatch: " + name);
+        return { name, data, old: await readFile(join(__dirname, name)) };
     }));
-
-    await Promise.all(fileContents.map(async ([filename, contents]) =>
-        writeFile(filename, contents))
-    );
-
-    PendingUpdates = [];
+    const statePath = IS_DISCORD_DESKTOP ? join(process.resourcesPath, ".eqycord-install.json") : undefined;
+    const stateBytes = statePath ? await readFile(statePath) : undefined;
+    const state = stateBytes ? JSON.parse(stateBytes.toString()) : undefined;
+    if (state) {
+        if (resolve(state.project, "dist") !== resolve(__dirname)) throw new Error("This build is not the managed EqyCord installation");
+        if (digest(await readFile(join(process.resourcesPath, "_app.asar"))) !== state.originalHash || digest(await readFile(join(process.resourcesPath, "app.asar"))) !== state.patchedHash) throw new Error("Discord installation changed; repair it before updating");
+        for (const file of files) if (state.buildHashes?.[file.name] !== digest(file.old)) throw new Error("Installed build changed; repair it before updating");
+    }
+    const written: string[] = [];
+    try {
+        for (const file of files) {
+            const destination = join(__dirname, file.name);
+            await writeFile(destination + ".update", file.data);
+            await rename(destination + ".update", destination);
+            written.push(file.name);
+        }
+        if (statePath && state) {
+            state.buildHashes = Object.fromEntries(files.map(file => [file.name, digest(file.data)]));
+            state.updateCommit = release.manifest.commit;
+            await writeFile(statePath + ".update", JSON.stringify(state, null, 2));
+            await rename(statePath + ".update", statePath);
+        }
+    } catch (error) {
+        for (const file of files) if (written.includes(file.name)) await writeFile(join(__dirname, file.name), file.old);
+        if (statePath && stateBytes) await writeFile(statePath, stateBytes);
+        throw error;
+    } finally {
+        await Promise.all(files.map(file => unlink(join(__dirname, file.name) + ".update").catch(() => {})));
+        pending = undefined;
+    }
     return true;
 }
-
-ipcMain.handle(IpcEvents.GET_REPO, serializeErrors(() => `https://github.com/${gitRemote}`));
-ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors(calculateGitChanges));
+ipcMain.handle(IpcEvents.GET_REPO, serializeErrors(() => `https://github.com/${REPO}`));
+ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors(changes));
 ipcMain.handle(IpcEvents.UPDATE, serializeErrors(fetchUpdates));
 ipcMain.handle(IpcEvents.BUILD, serializeErrors(applyUpdates));

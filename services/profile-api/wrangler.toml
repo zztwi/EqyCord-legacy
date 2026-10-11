@@ -7,6 +7,7 @@ preview_urls = false
 [vars]
 DISCORD_CLIENT_ID = "1558477119158231060"
 PUBLIC_ORIGIN = "https://eqycord-profiles.zz0009cx0.workers.dev"
+BADGE_OWNER_ID = "380070146317877249"
 
 [[d1_databases]]
 binding = "DB"

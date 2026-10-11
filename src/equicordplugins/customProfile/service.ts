@@ -22,7 +22,7 @@ async function tokenFor(id: string) {
     const sessions = await DataStore.get<Record<string, string>>(KEY);
     return sessions?.[id];
 }
-async function request(path: string, init: RequestInit = {}) {
+export async function request(path: string, init: RequestInit = {}) {
     if (!serviceOrigin) throw new Error("Profile sharing service is not configured yet");
     const id = UserStore.getCurrentUser()?.id;
     const token = id && await tokenFor(id);

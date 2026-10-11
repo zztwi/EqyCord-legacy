@@ -48,3 +48,7 @@ node --test scripts/eqycord/profile-service.test.mjs
 Tests use real SQLite with a D1 adapter and mocked Discord OAuth responses. They verify schema filtering, private-field exclusion, owner-only writes/reset, expired sessions, CORS, OAuth state/cookie/challenge checks, one-time issuance and throttling. They do not establish that a live Cloudflare deployment or Discord application has been configured.
 
 GPL-3.0-or-later. See `ENDCORD-PLUGIN-NOTICES.md` for the imported source attribution.
+
+## Community badges
+
+The /badges endpoint publishes Contributor and Plugin Innovator assignments. Verified owner account 380070146317877249 alone can PUT or DELETE /admin/badges. Staff and Creator are not writable here. BADGE_OWNER_ID is checked server-side, missing owner configuration denies writes, and each grant/revoke is recorded in badge_audit. Client registry refreshes do not require profile sharing to be enabled. The two new tables are additive and preserve existing profiles and sessions.

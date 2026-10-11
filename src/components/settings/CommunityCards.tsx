@@ -6,9 +6,9 @@
 
 import "./CommunityCards.css";
 
-import { hasEqyCordBadge } from "@shared/eqycordBadges";
+import { communityBadgesRevision, hasEqyCordBadge, subscribeCommunityBadges } from "@shared/eqycordBadges";
 import community from "@shared/eqycordCommunity.json";
-import { UserStore, useStateFromStores } from "@webpack/common";
+import { React, UserStore, useStateFromStores } from "@webpack/common";
 import innovatorIcon from "file://../../assets/eqycord-badges/innovator.svg?base64";
 
 import { SpecialCard } from "./SpecialCard";
@@ -46,6 +46,7 @@ function SupportIllustration() {
 }
 
 export function CommunityCards() {
+    React.useSyncExternalStore(subscribeCommunityBadges, communityBadgesRevision);
     const userId = useStateFromStores([UserStore], () => UserStore.getCurrentUser()?.id);
     const contributor = hasEqyCordBadge(userId, "contributor");
     const innovator = hasEqyCordBadge(userId, "innovator");

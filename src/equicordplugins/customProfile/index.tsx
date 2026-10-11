@@ -101,6 +101,22 @@ const badge: ProfileBadge = {
 function Pencil(props: any) {
     return <svg {...props} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15z" /></svg>;
 }
+function ProfilePreview({ data }: { data: CustomProfileData; }) {
+    const user = UserStore.getCurrentUser();
+    const color = (value: number) => `#${value.toString(16).padStart(6, "0")}`;
+    const primary = data.accentColor ?? 0x232428;
+    const secondary = data.accentColor2 ?? primary;
+    const luminance = ((primary >> 16 & 255) * 0.2126 + (primary >> 8 & 255) * 0.7152 + (primary & 255) * 0.0722) / 255;
+    const icons = BADGES.filter(b => (data.badgeFlags ?? 0) & b.flag).map(b => ({ label: b.label, icon: b.icon }));
+    for (const id of data.customBadgeIds ?? []) if (SPECIAL_BADGES[id]) icons.push(SPECIAL_BADGES[id]);
+    if (data.nitroLevel != null && NITRO_LEVELS[data.nitroLevel]) icons.push(NITRO_LEVELS[data.nitroLevel]);
+    if (data.boostMonths != null && BOOST_ICONS[data.boostMonths]) icons.push({ label: BOOST_LABELS[data.boostMonths], icon: BOOST_ICONS[data.boostMonths] });
+    const avatar = data.avatar && isProfileImage(data.avatar, true) ? data.avatar : IconUtils.getUserAvatarURL(user);
+    return <section className="eqy-cp-preview" aria-label="Live profile preview" style={{ background: `linear-gradient(135deg,${color(primary)},${color(secondary)})`, color: luminance > 0.6 ? "#17181c" : "#f5f6fa" }}>
+        <div className="eqy-cp-preview-banner">{data.banner && isProfileImage(data.banner, true) && <img src={data.banner} alt="Banner preview" />}</div>
+        <div className="eqy-cp-preview-body"><img className="eqy-cp-preview-avatar" src={avatar} alt="Avatar preview" /><small>Live preview · unsaved</small><h4>{data.globalName || user.globalName || user.username}</h4><div>{data.username || user.username} {data.oldName && <strong> · {data.oldName}</strong>}</div>{data.pronouns && <small>{data.pronouns}</small>}<div className="eqy-cp-preview-badges">{icons.map((b, i) => <img key={i} src={b.icon} alt={b.label} title={b.label} />)}</div><p>{data.bio || "Your bio will appear here"}</p>{data.createdAt && <small>Member since {data.createdAt}</small>}</div>
+    </section>;
+}
 function Editor(props: any) {
     const { id } = UserStore.getCurrentUser();
     const initial = saved[id] ?? EMPTY;
@@ -137,6 +153,7 @@ function Editor(props: any) {
         <Header><Pencil /><h2>Custom Profile</h2><Close onClick={props.onClose} /></Header>
         <Content className="eqy-cp-content">
             <p className="eqy-cp-note">Profile appearance for EqyCord. Badges and Nitro styles are cosmetic.</p>
+            <ProfilePreview data={data} />
             <div className="eqy-cp-presets"><input aria-label="Preset name" placeholder="Preset name" value={presetName} onChange={e => setPresetName(e.target.value)} maxLength={32} /><button type="button" disabled={!presetName.trim() || presets.length >= 20 || busy} onClick={() => { setPresets([...presets, { name: presetName.trim(), data: { ...data } }]); setPresetName(""); }}>Save preset</button></div>
             <div className="eqy-cp-chips">{presets.map((p, i) => <span key={i}><button type="button" onClick={() => setData({ ...p.data })}>{p.name}</button><button type="button" aria-label={`Delete preset ${p.name}`} onClick={() => setPresets(presets.filter((_, n) => n !== i))}>×</button></span>)}</div>
             <h3>Identity</h3><div className="eqy-cp-grid">{text("username", "Username", "text", "Your username")}{text("globalName", "Display name")}</div>

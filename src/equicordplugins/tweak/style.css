@@ -1,0 +1,75 @@
+.eqy-tweak-panel {
+    width: min(720px, 94vw);
+    color: var(--text-normal);
+}
+
+.eqy-tweak-panel h2 {
+    flex: 1;
+    margin-left: 12px;
+}
+
+.eqy-tweak-panel p {
+    line-height: 1.5;
+}
+
+.eqy-tweak-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.eqy-tweak-panel button {
+    padding: 10px 14px;
+    border: 0;
+    border-radius: 6px;
+    background: #5865f2;
+    color: white;
+    cursor: pointer;
+}
+
+.eqy-tweak-panel button:disabled {
+    opacity: .5;
+    cursor: default;
+}
+
+.eqy-tweak-panel table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+.eqy-tweak-panel td, .eqy-tweak-panel th {
+    text-align: left;
+    padding: 10px;
+    border-bottom: 1px solid var(--background-modifier-accent);
+}
+
+.eqy-tweak-optimized :is([class*="avatar"], [class*="decoration"], [class*="banner"], .eqy-support-heart, .eqy-support-sparkle) {
+    animation: none !important;
+    transition: none !important;
+}
+
+
+.eqy-tweak-content {
+    max-height: 65vh;
+    overflow-y: auto;
+    padding: 20px 24px;
+}
+
+.eqy-tweak-panel label {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 16px 0;
+    font-weight: 600;
+}
+
+.eqy-tweak-panel input, .eqy-tweak-panel select {
+    padding: 10px 12px;
+    border: 1px solid var(--background-modifier-accent, #45464d);
+    border-radius: 6px;
+    background: var(--background-secondary, #2b2d31);
+    color: var(--text-normal, #eee);
+    font: inherit;
+}
+

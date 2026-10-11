@@ -14,8 +14,19 @@ export const eqycordBadgeDefinitions = Object.freeze([
 ] as const);
 
 export type EqyCordBadgeAsset = typeof eqycordBadgeDefinitions[number]["asset"];
+let liveAssignments: Record<EqyCordBadgeAsset, readonly string[]> = assignments;
+let revision = 0;
+const listeners = new Set<() => void>();
+export const communityBadgesRevision = () => revision;
+export const subscribeCommunityBadges = (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener); }; };
+export function setCommunityBadgeAssignments(data: { contributor: string[]; innovator: string[]; }) {
+    for (const list of [data.contributor, data.innovator]) if (!Array.isArray(list) || list.length > 5000 || list.some(id => !/^\d{17,20}$/.test(id))) throw new Error("Invalid community badges");
+    liveAssignments = { ...assignments, contributor: [...new Set(data.contributor)], innovator: [...new Set(data.innovator)] };
+    revision++;
+    listeners.forEach(listener => listener());
+}
 
-export function hasEqyCordBadge(userId: string | undefined, asset: EqyCordBadgeAsset, registry: Record<EqyCordBadgeAsset, readonly string[]> = assignments): boolean {
+export function hasEqyCordBadge(userId: string | undefined, asset: EqyCordBadgeAsset, registry: Record<EqyCordBadgeAsset, readonly string[]> = liveAssignments): boolean {
     return !!userId && registry[asset].includes(userId);
 }
 

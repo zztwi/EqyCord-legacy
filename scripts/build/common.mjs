@@ -48,9 +48,8 @@ export const IS_COMPANION_TEST = false;
 export const IS_EQUIBOP = false;
 export const IS_STANDALONE = process.argv.includes("--standalone");
 
-// This fork has no validated release/update channel yet. Retain the updater
-// implementation for a future release, but never fetch upstream Vencord binaries.
-export const IS_UPDATER_DISABLED = true;
+// Packaged builds use the validated EqyCord release channel; source checkouts do not.
+export const IS_UPDATER_DISABLED = !IS_STANDALONE;
 export const gitHash = process.env.VENCORD_HASH || execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
 
 export const banner = {
@@ -380,4 +379,3 @@ export const commonRendererPlugins = [
     // @ts-expect-error this is never undefined
     ...commonOpts.plugins
 ];
-
