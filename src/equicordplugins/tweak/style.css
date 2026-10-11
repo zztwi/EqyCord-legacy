@@ -302,6 +302,12 @@
     font-size: 18px;
 }
 
+.eqy-tweak-panel .eqy-badge-empty {
+    grid-column: 1 / -1;
+    margin: 12px 0 0;
+    color: var(--eqy-tool-muted);
+}
+
 .eqy-tweak-panel .eqy-tweak-status {
     padding: 12px;
     border-radius: 6px;
