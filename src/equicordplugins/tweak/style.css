@@ -1,59 +1,202 @@
 .eqy-tweak-panel {
+    --eqy-tool-text: var(--text-default, var(--text-normal, #f2f3f5));
+    --eqy-tool-muted: var(--text-muted, #b5bac1);
+    --eqy-tool-surface: var(--background-base-low, #232428);
+    --eqy-tool-field: var(--background-mod-subtle, #35373c);
+    --eqy-tool-border: var(--border-subtle, #41434a);
+
     width: min(720px, 94vw);
-    color: var(--text-normal);
+    background: var(--eqy-tool-surface);
+    color: var(--eqy-tool-text);
+    font-family: var(--font-primary, "Segoe UI", system-ui, sans-serif);
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.eqy-tweak-panel .eqy-tweak-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--eqy-tool-border);
+    color: var(--eqy-tool-text);
+    box-shadow: none;
 }
 
 .eqy-tweak-panel h2 {
     flex: 1;
-    margin-left: 12px;
+    margin: 0;
+    color: var(--eqy-tool-text);
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.eqy-tweak-panel h3 {
+    margin: 0 0 12px;
+    color: var(--eqy-tool-text);
+    font-size: 16px;
+    font-weight: 650;
+    line-height: 1.4;
+}
+
+.eqy-tweak-panel :is(p, li, label, th, td, summary) {
+    color: var(--eqy-tool-text);
+    font-size: 14px;
+    line-height: 1.55;
 }
 
 .eqy-tweak-panel p {
-    line-height: 1.5;
+    margin: 0 0 14px;
+}
+
+.eqy-tweak-panel svg {
+    color: var(--eqy-tool-text);
+}
+
+.eqy-tweak-heading-icon {
+    display: inline-flex;
+    padding: 8px;
+    border-radius: 8px;
+    background: var(--eqy-tool-field);
+}
+
+.eqy-tweak-content {
+    max-height: 65vh;
+    overflow-y: auto;
+    padding: 20px 24px 24px;
+    scrollbar-width: thin;
+    scrollbar-color: #60636a transparent;
+}
+
+.eqy-tweak-panel .eqy-tweak-intro {
+    margin-bottom: 20px;
+    color: var(--eqy-tool-muted);
 }
 
 .eqy-tweak-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+    margin: 0 0 20px;
 }
 
-.eqy-tweak-panel button {
-    padding: 10px 14px;
-    border: 0;
+.eqy-tweak-actions button {
+    min-height: 40px;
+    padding: 9px 16px;
+    border: 1px solid transparent;
     border-radius: 6px;
-    background: #5865f2;
-    color: white;
+    background: #4752c4;
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
     cursor: pointer;
 }
 
-.eqy-tweak-panel button:disabled {
-    opacity: .5;
-    cursor: default;
+.eqy-tweak-close {
+    display: flex;
+}
+
+.eqy-tweak-close button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    min-height: 32px;
+    padding: 6px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--eqy-tool-muted);
+    cursor: pointer;
+}
+
+.eqy-tweak-close button:hover {
+    background: var(--eqy-tool-field);
+}
+
+.eqy-tweak-actions button.eqy-tweak-secondary {
+    border-color: var(--eqy-tool-border);
+    background: var(--eqy-tool-field);
+    color: var(--eqy-tool-text);
+}
+
+.eqy-tweak-actions button:disabled {
+    border-color: var(--eqy-tool-border);
+    background: var(--eqy-tool-field);
+    color: var(--eqy-tool-muted);
+    cursor: not-allowed;
+}
+
+.eqy-tweak-actions button:hover:not(:disabled) {
+    background: #3c45a5;
+}
+
+.eqy-tweak-panel :is(button, input, select, summary):focus-visible {
+    outline: 2px solid #949cf7;
+    outline-offset: 2px;
+}
+
+.eqy-tweak-section {
+    margin: 20px 0;
+    padding: 18px;
+    border: 1px solid var(--eqy-tool-border);
+    border-radius: 8px;
+}
+
+.eqy-tweak-panel .eqy-tweak-options {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.eqy-tweak-options li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--eqy-tool-border);
+}
+
+.eqy-tweak-options li:last-child {
+    border: 0;
+}
+
+.eqy-tweak-value {
+    padding: 2px 10px;
+    border-radius: 4px;
+    background: var(--eqy-tool-field);
+    color: var(--eqy-tool-text);
+    font-weight: 600;
+}
+
+.eqy-tweak-panel summary {
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.eqy-tweak-panel details p {
+    margin: 12px 0 0;
+    color: var(--eqy-tool-muted);
 }
 
 .eqy-tweak-panel table {
     width: 100%;
     border-collapse: collapse;
     margin: 20px 0;
+    font-variant-numeric: tabular-nums;
 }
 
 .eqy-tweak-panel td, .eqy-tweak-panel th {
     text-align: left;
     padding: 10px;
-    border-bottom: 1px solid var(--background-modifier-accent);
+    border-bottom: 1px solid var(--eqy-tool-border);
 }
 
-.eqy-tweak-optimized :is([class*="avatar"], [class*="decoration"], [class*="banner"], .eqy-support-heart, .eqy-support-sparkle) {
-    animation: none !important;
-    transition: none !important;
-}
-
-
-.eqy-tweak-content {
-    max-height: 65vh;
-    overflow-y: auto;
-    padding: 20px 24px;
+.eqy-tweak-panel th {
+    background: var(--eqy-tool-field);
+    font-weight: 600;
 }
 
 .eqy-tweak-panel label {
@@ -65,11 +208,34 @@
 }
 
 .eqy-tweak-panel input, .eqy-tweak-panel select {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 42px;
     padding: 10px 12px;
-    border: 1px solid var(--background-modifier-accent, #45464d);
+    border: 1px solid var(--eqy-tool-border);
     border-radius: 6px;
-    background: var(--background-secondary, #2b2d31);
-    color: var(--text-normal, #eee);
+    background: var(--eqy-tool-field);
+    color: var(--eqy-tool-text);
     font: inherit;
+    font-weight: 400;
 }
 
+.eqy-tweak-panel input::placeholder {
+    color: var(--eqy-tool-muted);
+    opacity: 1;
+}
+
+.eqy-tweak-panel .eqy-tweak-status {
+    padding: 12px;
+    border-radius: 6px;
+    background: var(--eqy-tool-field);
+}
+
+.eqy-tweak-panel [role="alert"] {
+    color: var(--text-danger, #ffa6a6);
+}
+
+.eqy-tweak-optimized :is([class*="avatar"], [class*="decoration"], [class*="banner"], .eqy-support-heart, .eqy-support-sparkle) {
+    animation: none !important;
+    transition: none !important;
+}

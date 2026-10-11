@@ -9,7 +9,6 @@ import "./style.css";
 import * as DataStore from "@api/DataStore";
 import { HeaderBarButton } from "@api/HeaderBar";
 import { UserSettings } from "@api/UserSettings";
-import { addLeftTool, removeLeftTool } from "@utils/eqyLeftToolbar";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin, { PluginNative } from "@utils/types";
 import { React, UserStore } from "@webpack/common";
@@ -82,19 +81,20 @@ function Panel(props: any) {
     }
     const Root = ModalRoot as React.ComponentType<any>;
     const Header = ModalHeader as React.ComponentType<any>, Content = ModalContent as React.ComponentType<any>, Close = ModalCloseButton as React.ComponentType<any>;
-    return <Root {...props} className="eqy-tweak-panel" size="medium"><Header><Icon /><h2>Tweak</h2><Close onClick={props.onClose} /></Header><Content className="eqy-tweak-content">
-        <p>Measure your interface, reduce automatic animations, then compare the results in the same screen.</p>
-        <div className="eqy-tweak-actions"><button disabled={busy} onClick={() => void run("measure")}>1. Run diagnostics</button><button disabled={busy || !before} onClick={() => void run("optimize")}>2. Optimize & compare</button><button disabled={busy || !applied} onClick={() => void run("restore")}>Restore settings</button></div>
+    return <Root {...props} className="eqy-tweak-panel" size="medium"><Header className="eqy-tweak-header"><span className="eqy-tweak-heading-icon"><Icon /></span><h2>Tweak</h2><span className="eqy-tweak-close"><Close onClick={props.onClose} /></span></Header><Content className="eqy-tweak-content">
+        <p className="eqy-tweak-intro">Measure your interface, reduce automatic animations, then compare the results in the same screen.</p>
+        <div className="eqy-tweak-actions"><button disabled={busy} onClick={() => void run("measure")}>1. Run diagnostics</button><button disabled={busy || !before} onClick={() => void run("optimize")}>2. Optimize & compare</button><button className="eqy-tweak-secondary" disabled={busy || !applied} onClick={() => void run("restore")}>Restore settings</button></div>
         {busy && <p role="status">Measuring for six seconds… keep this window visible.</p>}
         {(before || after) && <table><thead><tr><th>Measured locally</th><th>Before</th><th>After</th></tr></thead><tbody>{([ ["Interface frames / second", "fps"], ["95th percentile frame time (ms)", "p95"], ["Long tasks", "longTasks"], ["JavaScript heap (MB)", "heapMB"], ["Discord process CPU (%)", "cpuPercent"], ["Process working sets (MB)", "processMemoryMB"] ] as const).map(([label, field]) => <tr key={field}><td>{label}</td>{[before, after].map((result, i) => <td key={i}>{result?.[field] == null ? "Unavailable" : result[field]!.toFixed(1)}</td>)}</tr>)}</tbody></table>}
-        <h3>Available automatic changes</h3><ul>{candidates().map(x => <li key={`${x.userSettingsAPIGroup}.${x.userSettingsAPIName}`}>{labels[x.userSettingsAPIName]} · {x.getSetting() ? "On" : "Off"}</li>)}<li>Decorative interface animation and transitions</li></ul>
-        <h3>Additional checks</h3><p>Game overlay, Clips recording, high-resolution streams, video backgrounds and heavy themes can add work. Review them in Discord settings. Tweak keeps voice, screen sharing and notifications working. Hardware acceleration is not changed automatically.</p><p>CPU and process memory are available on desktop only. Working sets can include shared memory. These are not game FPS or total system CPU. Compare under the same conditions; a smaller frame time is better. Unsupported measurements are marked unavailable.</p>
+        <section className="eqy-tweak-section"><h3>Available automatic changes</h3><ul className="eqy-tweak-options">{candidates().map(x => <li key={`${x.userSettingsAPIGroup}.${x.userSettingsAPIName}`}><span>{labels[x.userSettingsAPIName]}</span><span className="eqy-tweak-value">{x.getSetting() ? "On" : "Off"}</span></li>)}<li><span>Decorative interface animation and transitions</span></li></ul></section>
+        <section className="eqy-tweak-section"><h3>Additional checks</h3><p>Review game overlay, Clips recording, high-resolution streams, video backgrounds and heavy themes in Discord settings.</p><details><summary>About these measurements</summary><p>Tweak keeps voice, screen sharing and notifications working. Hardware acceleration is not changed automatically.</p><p>CPU and process memory are available on desktop only. Working sets can include shared memory. These are not game FPS or total system CPU. Compare under the same conditions; a smaller frame time is better. Unsupported measurements are marked unavailable.</p></details></section>
         {error && <p role="alert">{error}</p>}
     </Content></Root>;
 }
-export default definePlugin({ name: "Tweak", description: "Performance diagnostics, reversible animation optimizations and before/after measurements.", authors: [{ name: "0009cx0", id: 380070146317877249n }], dependencies: ["UserSettingsAPI"], enabledByDefault: true,
-    async start() { enabled = true; const id = UserStore.getCurrentUser()?.id; appliedUser = id; changes = id ? await DataStore.get<Change[]>(key(id)) ?? [] : []; if (!enabled) return; if (changes.length) document.documentElement.classList.add("eqy-tweak-optimized"); addLeftTool("tweak", () => <HeaderBarButton icon={Icon} tooltip="Tweak" onClick={() => openModal(props => <Panel {...props} />)} />); },
-    stop() { enabled = false; controller?.abort(); removeLeftTool("tweak"); void (pendingMutation ?? Promise.resolve()).catch(() => {}).then(restore).catch(() => {}); }
+export default definePlugin({ name: "Tweak", description: "Performance diagnostics, reversible animation optimizations and before/after measurements.", authors: [{ name: "0009cx0", id: 380070146317877249n }], dependencies: ["UserSettingsAPI", "HeaderBarAPI"], enabledByDefault: true,
+    headerBarButton: { icon: Icon, render: () => <HeaderBarButton icon={Icon} tooltip="Tweak" onClick={() => openModal(props => <Panel {...props} />)} />, priority: 15 },
+    async start() { enabled = true; const id = UserStore.getCurrentUser()?.id; appliedUser = id; changes = id ? await DataStore.get<Change[]>(key(id)) ?? [] : []; if (!enabled) return; if (changes.length) document.documentElement.classList.add("eqy-tweak-optimized"); },
+    stop() { enabled = false; controller?.abort(); void (pendingMutation ?? Promise.resolve()).catch(() => {}).then(restore).catch(() => {}); }
 });
 
 
