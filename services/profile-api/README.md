@@ -51,4 +51,16 @@ GPL-3.0-or-later. See `ENDCORD-PLUGIN-NOTICES.md` for the imported source attrib
 
 ## Community badges
 
-The /badges endpoint publishes Contributor and Plugin Innovator assignments. Verified owner account 380070146317877249 alone can PUT or DELETE /admin/badges. Staff and Creator are not writable here. BADGE_OWNER_ID is checked server-side, missing owner configuration denies writes, and each grant/revoke is recorded in badge_audit. Client registry refreshes do not require profile sharing to be enabled. The two new tables are additive and preserve existing profiles and sessions.
+On 2026-10-11 the existing database was backed up, the expansion migration applied and the updated Worker deployed. The live public registry returned all ten keys; existing badge and audit counts were preserved and the First 10 trigger was present. No new badge assignments were made during deployment. Live owner assignment through Discord's interface still requires a user interaction; local tests cover the authenticated endpoint and panel selection.
+
+The `/badges` endpoint publishes all ten community badge assignments: Contributor, Plugin Innovator, Limited Edition, Veteran, Collab Partner, Event Winner, Community Spark, Support, Beta Tester and First 10. The shared catalog supplies the client and server allowlists. Verified owner account `380070146317877249` alone can PUT or DELETE `/admin/badges`. Staff and Creator are not writable here. `BADGE_OWNER_ID` is checked server-side, missing owner configuration denies writes, and each grant/revoke is recorded in `badge_audit`. Client registry refreshes do not require profile sharing to be enabled. A database trigger caps First 10 at ten accounts; capacity errors return 409. Repeated grants are idempotent and revocation frees capacity.
+
+For an existing database with the original two-badge CHECK constraint, export a backup before expanding it:
+
+```sh
+pnpm dlx wrangler@4.149.0 d1 export eqycord-profiles --remote --output before-badge-expansion.sql
+pnpm dlx wrangler@4.149.0 d1 migrations apply eqycord-profiles --remote
+pnpm dlx wrangler@4.149.0 deploy
+```
+
+Migration `0001_expand_community_badges.sql` preserves prior assignments, profiles, sessions and audit history. Keep the export private; it includes service data. New installations can apply `schema.sql` directly. Local SQLite tests verify migration preservation, every badge's owner-only grant/revoke, and First 10 capacity. Existing clients can ignore new registry keys; missing new keys default to empty lists.

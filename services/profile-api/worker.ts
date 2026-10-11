@@ -1,5 +1,6 @@
 /* EqyCord profile service. Copyright (c) 2026 EqyCord contributors. SPDX-License-Identifier: GPL-3.0-or-later */
 import { isDiscordId, profileApiOrigin, publicCustomProfile } from "../../src/shared/eqyCustomProfile";
+import { communityBadgeIds, isCommunityBadgeId } from "../../src/shared/eqyCommunityBadges";
 
 interface Statement {
     bind(...values: unknown[]): Statement;
@@ -48,8 +49,8 @@ async function route(request: Request, env: Env): Promise<Response> {
     const ip = request.headers.get("CF-Connecting-IP") ?? "local";
     if (url.pathname === "/badges" && request.method === "GET") {
         if (await limited(env, `badges:${ip}`, 60, now)) return json({ error: "Please try again later" }, 429);
-        const rows = await env.DB.prepare("SELECT user_id,badge FROM badges ORDER BY user_id LIMIT 5000").all<{ user_id: string; badge: string }>();
-        return json({ contributor: rows.results.filter(x => x.badge === "contributor").map(x => x.user_id), innovator: rows.results.filter(x => x.badge === "innovator").map(x => x.user_id) });
+        const rows = await env.DB.prepare("SELECT user_id,badge FROM badges ORDER BY user_id LIMIT 50000").all<{ user_id: string; badge: string }>();
+        return json(Object.fromEntries(communityBadgeIds.map(badge => [badge, rows.results.filter(x => x.badge === badge).map(x => x.user_id).slice(0, 5000)])));
     }
     if (url.pathname.startsWith("/auth/") && await limited(env, `auth:${ip}`, 30, now)) return json({ error: "Please try again later" }, 429);
 
@@ -110,7 +111,7 @@ async function route(request: Request, env: Env): Promise<Response> {
         if (request.method === "GET") return json({ owner: true });
         if (request.method !== "PUT" && request.method !== "DELETE") return json({ error: "Method not allowed" }, 405);
         const data = await body(request);
-        if (!isDiscordId(data.userId) || !["contributor", "innovator"].includes(data.badge)) return json({ error: "Invalid badge assignment" }, 400);
+        if (!isDiscordId(data.userId) || !isCommunityBadgeId(data.badge)) return json({ error: "Invalid badge assignment" }, 400);
         await env.DB.batch([
             request.method === "PUT"
                 ? env.DB.prepare("INSERT INTO badges(user_id,badge,assigned_by,updated_at) VALUES (?,?,?,?) ON CONFLICT(user_id,badge) DO UPDATE SET assigned_by=excluded.assigned_by,updated_at=excluded.updated_at").bind(data.userId, data.badge, auth.user_id, now)
@@ -149,7 +150,10 @@ export default {
         if (request.method === "OPTIONS") response = new Response(null, { status: 204 });
         else {
             try { response = await route(request, env); }
-            catch (error) { response = json({ error: error instanceof SyntaxError || error instanceof RangeError ? "Invalid request" : error instanceof Error && /Invalid|Use an|Expected|too large/.test(error.message) ? error.message : "Service unavailable" }, error instanceof SyntaxError || error instanceof RangeError || error instanceof Error && /Invalid|Use an|Expected|too large/.test(error.message) ? 400 : 503); }
+            catch (error) {
+                if (error instanceof Error && error.message.includes("FIRST10_LIMIT")) response = json({ error: "First 10 can be assigned to at most ten members. Revoke an existing assignment before choosing a replacement." }, 409);
+                else response = json({ error: error instanceof SyntaxError || error instanceof RangeError ? "Invalid request" : error instanceof Error && /Invalid|Use an|Expected|too large/.test(error.message) ? error.message : "Service unavailable" }, error instanceof SyntaxError || error instanceof RangeError || error instanceof Error && /Invalid|Use an|Expected|too large/.test(error.message) ? 400 : 503);
+            }
         }
         response.headers.set("Cache-Control", "no-store");
         response.headers.set("X-Content-Type-Options", "nosniff");

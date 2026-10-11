@@ -2,7 +2,7 @@ name: EqyCord release channel
 on:
     push:
         branches: [feature/eqycord-plugin-origins]
-        paths: [src/**, scripts/**, browser/**, package.json, pnpm-lock.yaml, .github/workflows/eqycord-release.yml]
+        paths: [src/**, scripts/**, services/**, browser/**, package.json, pnpm-lock.yaml, .github/workflows/eqycord-release.yml]
     workflow_dispatch:
 permissions:
     contents: write
@@ -11,10 +11,13 @@ concurrency:
     cancel-in-progress: false
 jobs:
     release:
-        if: github.repository == 'zztwi/EqyCord'
+        # Local validation/publication is used while GitHub blocks hosted runners.
+        if: github.repository == 'zztwi/EqyCord' && vars.EQYCORD_HOSTED_CI == 'true'
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v7
+              with:
+                  fetch-depth: 0
             - uses: pnpm/action-setup@v6
             - uses: actions/setup-node@v6
               with:

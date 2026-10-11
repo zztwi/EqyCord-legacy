@@ -21,6 +21,8 @@ test("Client pins the deployed profile origin with an exact connect-src policy",
     assert.ok(!csp.includes('"*.workers.dev"'));
 });
 const worker = (await load("services/profile-api/worker.ts")).default;
+const { communityBadgeIds } = await load("src/shared/eqyCommunityBadges.ts");
+const emptyBadges = () => Object.fromEntries(communityBadgeIds.map(id => [id, []]));
 const userA = "380070146317877249", userB = "1306071807815712828";
 function fixture() {
     const db = new DatabaseSync(":memory:");
@@ -124,12 +126,60 @@ test("Community badges require verified owner writes, reject staff grants and lo
     assert.equal((await send("/admin/badges", "PUT", assignment, b)).status, 403);
     assert.equal((await send("/admin/badges", "PUT", { ...assignment, badge: "staff" }, a)).status, 400);
     assert.equal((await send("/admin/badges", "PUT", assignment, a)).status, 200);
-    assert.deepEqual(await (await send("/badges")).json(), { contributor: [userB], innovator: [] });
+    assert.deepEqual(await (await send("/badges")).json(), { ...emptyBadges(), contributor: [userB] });
     assert.equal((await send("/admin/badges", "PUT", { ...assignment, badge: "innovator" }, a)).status, 200);
     assert.equal((await send("/admin/badges", "DELETE", assignment, a)).status, 200);
-    assert.deepEqual(await (await send("/badges")).json(), { contributor: [], innovator: [userB] });
+    assert.deepEqual(await (await send("/badges")).json(), { ...emptyBadges(), innovator: [userB] });
     assert.equal(db.prepare("SELECT count(*) AS n FROM badge_audit").get().n, 3);
     delete env.BADGE_OWNER_ID;
     assert.equal((await send("/admin/badges", "DELETE", { ...assignment, badge: "innovator" }, a)).status, 403);
+    db.close();
+});
+
+test("Every community badge grants and revokes independently through verified owner sessions", async () => {
+    const { db, env, send, addSession } = fixture();
+    env.BADGE_OWNER_ID = userA;
+    const token = "a".repeat(43); addSession(userA, token);
+    for (const badge of communityBadgeIds) {
+        assert.equal((await send("/admin/badges", "PUT", { userId: userB, badge }, token)).status, 200, badge);
+        assert.deepEqual((await (await send("/badges")).json())[badge], [userB]);
+        assert.equal((await send("/admin/badges", "DELETE", { userId: userB, badge }, token)).status, 200);
+        assert.deepEqual(await (await send("/badges")).json(), emptyBadges());
+    }
+    assert.equal(db.prepare("SELECT count(*) AS n FROM badge_audit").get().n, 20);
+    db.close();
+});
+
+test("First 10 is capped atomically, repeat assignments work and revocation frees a place", async () => {
+    const { db, env, send, addSession } = fixture();
+    env.BADGE_OWNER_ID = userA;
+    const token = "a".repeat(43); addSession(userA, token);
+    const ids = Array.from({ length: 11 }, (_, i) => String(123456789012345670n + BigInt(i)));
+    for (const userId of ids.slice(0, 10)) assert.equal((await send("/admin/badges", "PUT", { userId, badge: "first10" }, token)).status, 200);
+    assert.equal((await send("/admin/badges", "PUT", { userId: ids[0], badge: "first10" }, token)).status, 200);
+    const rejected = await send("/admin/badges", "PUT", { userId: ids[10], badge: "first10" }, token);
+    assert.equal(rejected.status, 409);
+    assert.match((await rejected.json()).error, /ten members/);
+    assert.equal(db.prepare("SELECT count(*) AS n FROM badge_audit").get().n, 11);
+    assert.equal((await send("/admin/badges", "DELETE", { userId: ids[0], badge: "first10" }, token)).status, 200);
+    assert.equal((await send("/admin/badges", "PUT", { userId: ids[10], badge: "first10" }, token)).status, 200);
+    assert.equal((await (await send("/badges")).json()).first10.length, 10);
+    db.close();
+});
+
+test("Badge schema migration preserves prior assignments, audit history and profiles", () => {
+    const { db } = fixture();
+    db.exec("DROP TABLE badges; CREATE TABLE badges(user_id TEXT NOT NULL,badge TEXT NOT NULL CHECK(badge IN ('contributor','innovator')),assigned_by TEXT NOT NULL,updated_at INTEGER NOT NULL,PRIMARY KEY(user_id,badge));");
+    db.prepare("INSERT INTO badges VALUES (?,?,?,?)").run(userB, "contributor", userA, 1);
+    db.prepare("INSERT INTO profiles VALUES (?,?,?)").run(userA, '{"globalName":"Keep"}', 2);
+    db.prepare("INSERT INTO badge_audit(actor_id,user_id,badge,action,created_at) VALUES (?,?,?,?,?)").run(userA, userB, "contributor", "grant", 1);
+    db.exec("BEGIN");
+    db.exec(readFileSync("services/profile-api/migrations/0001_expand_community_badges.sql", "utf8"));
+    db.exec("COMMIT");
+    assert.equal(db.prepare("SELECT badge FROM badges WHERE user_id=?").get(userB).badge, "contributor");
+    assert.equal(db.prepare("SELECT data FROM profiles").get().data, '{"globalName":"Keep"}');
+    assert.equal(db.prepare("SELECT count(*) AS n FROM badge_audit").get().n, 1);
+    db.prepare("INSERT INTO badges VALUES (?,?,?,?)").run(userB, "limitedEdition", userA, 3);
+    assert.throws(() => db.prepare("INSERT INTO badges VALUES (?,?,?,?)").run(userB, "staff", userA, 4));
     db.close();
 });

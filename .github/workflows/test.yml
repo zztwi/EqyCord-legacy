@@ -1,12 +1,16 @@
 name: test
 on:
     push:
+    workflow_dispatch:
     pull_request:
         branches:
             - main
             - dev
 jobs:
     test:
+        # EqyCord's hosted runners are billing-locked. Local checks remain required.
+        # Set EQYCORD_HOSTED_CI=true after the account's billing issue is resolved.
+        if: github.repository != 'zztwi/EqyCord' || vars.EQYCORD_HOSTED_CI == 'true'
         strategy:
             matrix:
                 os: [ubuntu-latest, windows-latest]

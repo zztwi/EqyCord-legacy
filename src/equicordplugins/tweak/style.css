@@ -308,6 +308,51 @@
     color: var(--eqy-tool-muted);
 }
 
+.eqy-badge-choice-image {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    object-fit: contain;
+}
+
+.eqy-badge-panel .eqy-tweak-content {
+    max-height: 55vh;
+}
+
+.eqy-badge-panel .eqy-badge-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--eqy-tool-border);
+    background: var(--eqy-tool-surface);
+    color: var(--eqy-tool-text);
+    box-shadow: none;
+}
+
+.eqy-badge-footer .eqy-tweak-actions {
+    margin: 0;
+}
+
+.eqy-badge-selection {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.eqy-badge-selection img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
+
+.eqy-badge-panel .eqy-tweak-status {
+    margin: 0;
+}
+
 .eqy-tweak-panel .eqy-tweak-status {
     padding: 12px;
     border-radius: 6px;
