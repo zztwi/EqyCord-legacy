@@ -5,6 +5,7 @@
  */
 
 import { PlainSettings } from "@api/Settings";
+import { parseSettingsBackup } from "@shared/eqySettingsBackup";
 import { Logger } from "@utils/Logger";
 import { chooseFile, saveFile } from "@utils/web";
 import { moment, showToast } from "@webpack/common";
@@ -17,38 +18,21 @@ const toastFailure = (err: any) =>
 
 const logger = new Logger("SettingsSync:Offline", "#39b7e0");
 
-function isSafeObject(obj: any) {
-    if (obj == null || typeof obj !== "object") return true;
-
-    for (const key in obj) {
-        if (["__proto__", "constructor", "prototype"].includes(key)) {
-            return false;
-        }
-        if (!isSafeObject(obj[key])) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
 export async function importSettings(data: string) {
+    const parsed = parseSettingsBackup(data);
+    const previous = VencordNative.settings.get();
+    const imported = { ...previous, ...parsed.settings };
+    const previousCss = await VencordNative.quickCss.get();
     try {
-        var parsed = JSON.parse(data);
-    } catch (err) {
-        console.log(data);
-        throw new Error("Failed to parse JSON: " + String(err));
-    }
-
-    if (!isSafeObject(parsed))
-        throw new Error("Unsafe Settings");
-
-    if ("settings" in parsed && "quickCss" in parsed) {
-        Object.assign(PlainSettings, parsed.settings);
-        await VencordNative.settings.set(parsed.settings);
+        await VencordNative.settings.set(imported);
         await VencordNative.quickCss.set(parsed.quickCss);
-    } else
-        throw new Error("Invalid Settings. Is this even a Vencord Settings file?");
+    } catch (error) {
+        // Restore persisted state if either write fails. Do not update memory first.
+        await VencordNative.settings.set(previous);
+        await VencordNative.quickCss.set(previousCss);
+        throw error;
+    }
+    Object.assign(PlainSettings, imported);
 }
 
 export async function exportSettings({ minify }: { minify?: boolean; } = {}) {
@@ -58,7 +42,7 @@ export async function exportSettings({ minify }: { minify?: boolean; } = {}) {
 }
 
 export async function downloadSettingsBackup() {
-    const filename = `vencord-settings-backup-${moment().format("YYYY-MM-DD")}.json`;
+    const filename = `eqycord-settings-backup-${moment().format("YYYY-MM-DD")}.json`;
     const backup = await exportSettings();
     const data = new TextEncoder().encode(backup);
 
@@ -73,7 +57,7 @@ export async function uploadSettingsBackup(showToast = true): Promise<void> {
     if (IS_DISCORD_DESKTOP) {
         const [file] = await DiscordNative.fileManager.openFiles({
             filters: [
-                { name: "Vencord Settings Backup", extensions: ["json"] },
+                { name: "EqyCord / Vencord Settings Backup", extensions: ["json"] },
                 { name: "all", extensions: ["*"] }
             ]
         });

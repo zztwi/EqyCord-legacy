@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "@components/settings/eqycord.css";
+
 import ErrorBoundary from "@components/ErrorBoundary";
 import { handleComponentFailed } from "@components/handleComponentFailed";
 import { onlyOnce } from "@utils/onlyOnce";
@@ -24,7 +26,9 @@ import type { ComponentType, PropsWithChildren } from "react";
 
 export function SettingsTab({ children }: PropsWithChildren) {
     return (
-        <section className="vc-settings-tab">{children}</section>
+        <section className="vc-settings-tab eqycord-settings-tab">
+            {children}
+        </section>
     );
 }
 

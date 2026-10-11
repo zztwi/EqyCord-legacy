@@ -73,7 +73,8 @@ function CloudSetupSection() {
             <SectionHeading text="Cloud Integrations" />
 
             <Paragraph size="md" className={Margins.bottom20}>
-                Vencord comes with a cloud integration that adds goodies like settings sync across devices.
+                EqyCord retains Vencord's cloud integration for settings sync across devices.
+                The selected backend is an external service, not an EqyCord-operated cloud.
                 It <Link href="https://vencord.dev/cloud/privacy">respects your privacy</Link>, and
                 the <Link href="https://github.com/Vencord/Backend">source code</Link> is AGPL 3.0 licensed so you
                 can host it yourself.
@@ -135,7 +136,7 @@ function SettingsSyncSection() {
                 <FormSwitch
                     key="cloud-sync"
                     title="Enable Settings Sync"
-                    description="Save your Vencord settings to the cloud so you can easily keep them the same on all your devices"
+                    description="Save your EqyCord settings to the selected backend to sync across devices"
                     value={cloud.settingsSync}
                     onChange={v => { cloud.settingsSync = v; }}
                     disabled={!cloud.authenticated}

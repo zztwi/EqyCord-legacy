@@ -11,9 +11,16 @@ import { mergeDefaults } from "@utils/mergeDefaults";
 import { ipcMain } from "electron";
 import { mkdirSync, readFileSync, writeFileSync } from "fs";
 
+import { initializeStarterSettings } from "./eqyStarterSettings";
 import { NATIVE_SETTINGS_FILE, SETTINGS_DIR, SETTINGS_FILE } from "./utils/constants";
 
 mkdirSync(SETTINGS_DIR, { recursive: true });
+
+try {
+    initializeStarterSettings(SETTINGS_DIR);
+} catch (error) {
+    console.error("Failed to initialize EqyCord starter settings", error);
+}
 
 function readSettings<T = object>(name: string, file: string): Partial<T> {
     try {

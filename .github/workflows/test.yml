@@ -1,16 +1,25 @@
 name: test
 on:
     push:
+    workflow_dispatch:
     pull_request:
         branches:
             - main
             - dev
 jobs:
     test:
-        runs-on: ubuntu-latest
+        # EqyCord's hosted runners are billing-locked. Local checks remain required.
+        # Set EQYCORD_HOSTED_CI=true after the account's billing issue is resolved.
+        if: github.repository != 'zztwi/EqyCord' || vars.EQYCORD_HOSTED_CI == 'true'
+        strategy:
+            matrix:
+                os: [ubuntu-latest, windows-latest]
+        runs-on: ${{ matrix.os }}
 
         steps:
             - uses: actions/checkout@v7
+              with:
+                  fetch-depth: 0
             - uses: pnpm/action-setup@v6 # Install pnpm using packageManager key in package.json
 
             - name: Use Node.js 24

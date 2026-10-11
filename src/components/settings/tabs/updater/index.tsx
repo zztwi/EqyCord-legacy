@@ -128,6 +128,18 @@ function Updater() {
     );
 }
 
+function DisabledUpdater() {
+    return (
+        <SettingsTab>
+            <Card variant="info">
+                <HeadingSecondary>EqyCord updates</HeadingSecondary>
+                <Paragraph>Automatic updates are disabled while this fork's release channel is being validated. Update from the EqyCord source, run the tests, and rebuild before reinstalling.</Paragraph>
+                <Paragraph><Link href="https://github.com/zztwi/EqyCord">Open EqyCord repository</Link></Paragraph>
+            </Card>
+        </SettingsTab>
+    );
+}
+
 export default IS_UPDATER_DISABLED
-    ? null
+    ? wrapTab(DisabledUpdater, "EqyCord Updater")
     : wrapTab(Updater, "Updater");

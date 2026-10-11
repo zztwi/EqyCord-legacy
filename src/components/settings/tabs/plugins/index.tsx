@@ -27,6 +27,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { HeadingTertiary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
+import { getPluginDisplayName, getPluginDisplayText, getPluginOrigin, matchesPluginOrigin, PluginOrigin } from "@shared/eqyPluginOrigins";
 import { ChangeList } from "@utils/ChangeList";
 import { classNameFactory } from "@utils/css";
 import { isTruthy } from "@utils/guards";
@@ -46,6 +47,16 @@ import { UIElementsButton } from "./UIElements";
 
 export const cl = classNameFactory("vc-plugins-");
 export const logger = new Logger("PluginSettings", "#a6d189");
+
+export const ExcludedReasons: Record<PluginTarget, string> = {
+    desktop: "Discord Desktop app or Vesktop",
+    discordDesktop: "Discord Desktop app",
+    vesktop: "Vesktop app",
+    equibop: "Equibop app",
+    web: "Vesktop app and the Web version of Discord",
+    dev: "Developer version of EqyCord",
+    browser: "Web Browser version of EqyCord"
+};
 
 function ReloadRequiredCard({ required }: { required: boolean; }) {
     return (
@@ -93,6 +104,7 @@ function ExcludedPluginsList({ search }: { search: string; }) {
         desktop: "Discord Desktop app or Vesktop",
         discordDesktop: "Discord Desktop app",
         vesktop: "Vesktop app",
+        equibop: "Equibop app",
         web: "Vesktop app and the Web version of Discord",
         dev: "Developer version of Vencord",
         browser: "Web Browser version of Vencord"
@@ -138,7 +150,7 @@ function PluginSettings() {
                         <div>{changes.map((s, i) => (
                             <React.Fragment key={s}>
                                 {i > 0 && ", "}
-                                {Parser.parse("`" + s.split(".")[0] + "`")}
+                                {Parser.parse("`" + getPluginDisplayName(s.split(".")[0], "EqyCord") + "`")}
                             </React.Fragment>
                         ))}</div>
                     </>
@@ -166,15 +178,17 @@ function PluginSettings() {
     )
         .toSorted((a, b) => Number(settings.plugins[b.name]?.isFavorite ?? false) - Number(settings.plugins[a.name]?.isFavorite ?? false));
 
-    const hasUserPlugins = useMemo(() => !IS_STANDALONE && Object.values(PluginMeta).some(m => m.userPlugin), []);
+    const hasUserPlugins = useMemo(() => Object.values(PluginMeta).some(m => m.userPlugin), []);
 
-    const [searchValue, setSearchValue] = useState({ value: "", tags: [] as PluginTag[], status: SearchStatus.ALL });
+    const [searchValue, setSearchValue] = useState({ value: "", tags: [] as PluginTag[], status: SearchStatus.ALL, origin: "All" as PluginOrigin | "All" });
 
     const search = searchValue.value.toLowerCase();
     const onSearch = (query: string) => setSearchValue(prev => ({ ...prev, value: query }));
 
     const pluginFilter = (plugin: typeof Plugins[keyof typeof Plugins]) => {
-        const { status, tags } = searchValue;
+        const { status, tags, origin } = searchValue;
+        const pluginOrigin = getPluginOrigin(plugin.name, PluginMeta[plugin.name]?.userPlugin, PluginMeta[plugin.name]?.folderName);
+        if (!matchesPluginOrigin(plugin.name, PluginMeta[plugin.name]?.userPlugin, origin, PluginMeta[plugin.name]?.folderName)) return false;
 
         switch (status) {
             case SearchStatus.FAVORITES:
@@ -202,9 +216,9 @@ function PluginSettings() {
         if (!search.length) return true;
 
         return (
-            plugin.name.toLowerCase().includes(search) ||
-            plugin.name.match(/[A-Z]/g)?.join("").toLowerCase().includes(search) || // acronyms like BF for BetterFolders
-            plugin.description.toLowerCase().includes(search) ||
+            getPluginDisplayName(plugin.name, pluginOrigin).toLowerCase().includes(search) ||
+            getPluginDisplayName(plugin.name, pluginOrigin).match(/[A-Z]/g)?.join("").toLowerCase().includes(search) || // acronyms like BF for BetterFolders
+            getPluginDisplayText(plugin.description, pluginOrigin).toLowerCase().includes(search) ||
             plugin.searchTerms?.some(t => t.toLowerCase().includes(search))
         );
     };
@@ -240,7 +254,7 @@ function PluginSettings() {
 
         if (isRequired) {
             const tooltipText = p.required || !depMap[p.name]
-                ? "This plugin is required for Vencord to function."
+                ? "This plugin is required for EqyCord's Vencord core to function."
                 : makeDependencyList(depMap[p.name]?.filter(d => settings.plugins[d].enabled));
 
             requiredPlugins.push(
@@ -316,6 +330,17 @@ function PluginSettings() {
                         placeholder="Filter by Tags"
                         multi
                     />
+                    <Select
+                        options={(["All", "Vencord", "EqyCord", "Community"] as const).map(origin => ({
+                            label: origin === "All" ? "Origin: All" : `Origin: ${origin}`,
+                            value: origin
+                        }))}
+                        serialize={String}
+                        select={origin => setSearchValue(prev => ({ ...prev, origin }))}
+                        isSelected={origin => origin === searchValue.origin}
+                        closeOnSelect
+                        placeholder="Filter by Origin"
+                    />
                 </div>
             </ErrorBoundary>
 
@@ -354,9 +379,14 @@ function makeDependencyList(deps: string[]) {
     return (
         <>
             <Paragraph>This plugin is required by:</Paragraph>
-            {deps.map((dep: string) => <Paragraph key={dep} className={cl("dep-text")}>{dep}</Paragraph>)}
+            {deps.map((dep: string) => <Paragraph key={dep} className={cl("dep-text")}>{getPluginDisplayName(dep, "EqyCord")}</Paragraph>)}
         </>
     );
 }
 
+export function PluginDependencyList({ deps }: { deps: string[]; }) {
+    return makeDependencyList(deps);
+}
+
 export default wrapTab(PluginSettings, "Plugins");
+

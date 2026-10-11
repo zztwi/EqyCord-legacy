@@ -1,12 +1,12 @@
 // ==UserScript==
-// @name            Vencord
-// @description     A Discord client mod - Web version
+// @name            EqyCord (based on Vencord)
+// @description     EqyCord Discord client mod - Unofficial Web development version
 // @version         %version%
-// @author          Vendicated (https://github.com/Vendicated)
-// @namespace       https://github.com/Vendicated/Vencord
-// @supportURL      https://github.com/Vendicated/Vencord
+// @author          EqyCord contributors; Vencord by Vendicated and contributors (https://github.com/Vendicated/Vencord)
+// @namespace       https://github.com/zztwi/EqyCord
+// @supportURL      https://github.com/zztwi/EqyCord/issues
 // @icon            https://raw.githubusercontent.com/Vendicated/Vencord/refs/heads/main/browser/icon.png
-// @license         GPL-3.0
+// @license         GPL-3.0-or-later
 // @match           *://*.discord.com/*
 // @grant           GM_xmlhttpRequest
 // @grant           unsafeWindow

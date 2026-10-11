@@ -22,7 +22,7 @@ export function SettingsTagList() {
         <section className={Margins.top8}>
             <BaseText size="md" weight="semibold">Registered Tags</BaseText>
             <Flex flexDirection="column" gap="0.5em" className={Margins.top8}>
-                {Object.values(tagsList).map(tag => (
+                {(Object.values(tagsList) as import("./settings").Tag[]).map(tag => (
                     <Card key={tag.name} className="vc-customCommands-card">
                         <Paragraph size="md" weight="medium">{tag.name}</Paragraph>
 

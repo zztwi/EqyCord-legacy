@@ -61,6 +61,7 @@ export const settings = definePluginSettings({
     },
     userBasedCategoryList: {
         type: OptionType.CUSTOM,
+        description: "The user-defined DM categories.",
         default: {} as Record<string, Category[]>
     }
 });

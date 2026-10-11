@@ -1,0 +1,41 @@
+name: EqyCord release channel
+on:
+    push:
+        branches: [feature/eqycord-plugin-origins]
+        paths: [src/**, scripts/**, services/**, browser/**, package.json, pnpm-lock.yaml, .github/workflows/eqycord-release.yml]
+    workflow_dispatch:
+permissions:
+    contents: write
+concurrency:
+    group: eqycord-release
+    cancel-in-progress: false
+jobs:
+    release:
+        # Local validation/publication is used while GitHub blocks hosted runners.
+        if: github.repository == 'zztwi/EqyCord' && vars.EQYCORD_HOSTED_CI == 'true'
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v7
+              with:
+                  fetch-depth: 0
+            - uses: pnpm/action-setup@v6
+            - uses: actions/setup-node@v6
+              with:
+                  node-version: 24
+                  cache: pnpm
+            - run: pnpm install --frozen-lockfile
+            - run: pnpm testTsc && pnpm lint && pnpm lint-styles
+            - run: node --test scripts/eqycord/profile-service.test.mjs scripts/eqycord/badges.test.mjs scripts/eqycord/updater.test.mjs
+            - run: pnpm buildStandalone && pnpm buildWeb
+            - run: node scripts/eqycord/release-manifest.mjs
+            - name: Publish exact tested build
+              env:
+                  GH_TOKEN: ${{ secrets.EQYCORD_RELEASE_TOKEN }}
+              run: |
+                  if [ -z "$GH_TOKEN" ]; then echo "Configure EQYCORD_RELEASE_TOKEN with contents-write access to zztwi/EqyCord-releases before enabling hosted publication."; exit 1; fi
+                  tag="eqycord-${GITHUB_SHA:0:8}"
+                  git archive --format=zip --output=dist/EqyCord-source.zip HEAD
+                  if gh release view "$tag" --repo zztwi/EqyCord-releases >/dev/null 2>&1; then exit 0; fi
+                  gh release create "$tag" --repo zztwi/EqyCord-releases --target main --title "EqyCord ${GITHUB_SHA:0:8}" --notes "EqyCord client update. Matching GPL source and checksummed update manifest included. Source development is private." --latest dist/patcher.js dist/preload.js dist/renderer.js dist/renderer.css dist/vencordDesktopMain.js dist/vencordDesktopPreload.js dist/vencordDesktopRenderer.js dist/vencordDesktopRenderer.css dist/eqycord-update.json dist/EqyCord-source.zip dist/extension-chrome.zip dist/extension-firefox.zip
+
+

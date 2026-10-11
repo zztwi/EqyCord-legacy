@@ -23,7 +23,7 @@ import "../checkNodeVersion.js";
 
 import { exec, execSync } from "child_process";
 import esbuild, { build, context } from "esbuild";
-import { constants as FsConstants, readFileSync } from "fs";
+import { constants as FsConstants, existsSync, readdirSync, readFileSync } from "fs";
 import { access, readdir, readFile } from "fs/promises";
 import { minify as minifyHtml } from "html-minifier-terser";
 import { optimize as optimizeSvg } from 'svgo';
@@ -44,14 +44,20 @@ export const watch = process.argv.includes("--watch");
 export const IS_DEV = watch || process.argv.includes("--dev");
 export const IS_REPORTER = process.argv.includes("--reporter");
 export const IS_ANTI_CRASH_TEST = process.argv.includes("--anti-crash-test");
+export const IS_COMPANION_TEST = false;
+export const IS_EQUIBOP = false;
 export const IS_STANDALONE = process.argv.includes("--standalone");
 
-export const IS_UPDATER_DISABLED = process.argv.includes("--disable-updater");
-export const gitHash = process.env.VENCORD_HASH || execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
+const sourceCommit = existsSync("SOURCE-COMMIT.txt") ? readFileSync("SOURCE-COMMIT.txt", "utf8").trim() : "";
+const archivedSource = /^[a-f0-9]{40}$/.test(sourceCommit);
+const personalPlugins = existsSync("src/userplugins") && readdirSync("src/userplugins").some(name => !name.startsWith(".") && !name.startsWith("_") && name !== "index.ts");
+// Personal/source-archive builds must not overwrite custom plugins with an official update.
+export const IS_UPDATER_DISABLED = !IS_STANDALONE || archivedSource || personalPlugins;
+export const gitHash = process.env.VENCORD_HASH || (archivedSource ? sourceCommit.slice(0, 8) : execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim());
 
 export const banner = {
     js: `
-// Vencord ${gitHash}
+// EqyCord ${gitHash}, based on Vencord (GPL-3.0-or-later)
 // Standalone: ${IS_STANDALONE}
 // Platform: ${IS_STANDALONE === false ? process.platform : "Universal"}
 // Updater Disabled: ${IS_UPDATER_DISABLED}
@@ -145,7 +151,7 @@ export const globPlugins = kind => ({
         });
 
         build.onLoad({ filter, namespace: "import-plugins" }, async () => {
-            const pluginDirs = ["plugins/_api", "plugins/_core", "plugins", "userplugins"];
+            const pluginDirs = ["plugins/_api", "plugins/_core", "plugins", "equicordplugins/_api", "equicordplugins/_core", "equicordplugins", "userplugins"];
             let code = "";
             let pluginsCode = "\n";
             let metaCode = "\n";
@@ -226,7 +232,7 @@ export const gitRemotePlugin = {
             namespace: "git-remote", path: args.path
         }));
         build.onLoad({ filter, namespace: "git-remote" }, async () => {
-            let remote = process.env.VENCORD_REMOTE;
+            let remote = process.env.VENCORD_REMOTE || (archivedSource ? "zztwi/EqyCord-releases" : undefined);
             if (!remote) {
                 const res = await promisify(exec)("git remote get-url origin", { encoding: "utf-8" });
                 remote = res.stdout.trim()

@@ -1,0 +1,15 @@
+name = "eqycord-profiles"
+main = "worker.ts"
+compatibility_date = "2026-10-10"
+workers_dev = true
+preview_urls = false
+
+[vars]
+DISCORD_CLIENT_ID = "1558477119158231060"
+PUBLIC_ORIGIN = "https://eqycord-profiles.zz0009cx0.workers.dev"
+BADGE_OWNER_ID = "380070146317877249"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "eqycord-profiles"
+database_id = "ffa76a4b-55ca-4ec5-abc8-0a040d7eae26"

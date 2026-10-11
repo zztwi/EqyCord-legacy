@@ -22,13 +22,15 @@
 import { readdir } from "fs/promises";
 import { join, resolve } from "path";
 
-import { BUILD_TIMESTAMP, commonOpts, exists, globPlugins, IS_DEV, IS_REPORTER, IS_ANTI_CRASH_TEST, IS_STANDALONE, IS_UPDATER_DISABLED, resolvePluginName, VERSION, commonRendererPlugins, watch, buildOrWatchAll, stringifyValues } from "./common.mjs";
+import { BUILD_TIMESTAMP, commonOpts, exists, globPlugins, IS_DEV, IS_REPORTER, IS_ANTI_CRASH_TEST, IS_COMPANION_TEST, IS_EQUIBOP, IS_STANDALONE, IS_UPDATER_DISABLED, resolvePluginName, VERSION, commonRendererPlugins, watch, buildOrWatchAll, stringifyValues } from "./common.mjs";
 
 const defines = stringifyValues({
     IS_STANDALONE,
     IS_DEV,
     IS_REPORTER,
     IS_ANTI_CRASH_TEST,
+    IS_COMPANION_TEST,
+    IS_EQUIBOP,
     IS_UPDATER_DISABLED,
     IS_WEB: false,
     IS_EXTENSION: false,
@@ -74,7 +76,7 @@ const globNativesPlugin = {
         });
 
         build.onLoad({ filter, namespace: "import-natives" }, async () => {
-            const pluginDirs = ["plugins", "userplugins"];
+            const pluginDirs = ["plugins", "equicordplugins", "userplugins"];
             let code = "";
             let natives = "\n";
             let i = 0;

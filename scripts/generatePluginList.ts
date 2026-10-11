@@ -63,33 +63,35 @@ function getObjectProp(node: ObjectLiteralExpression, name: string) {
 
 function parseDevs() {
     const file = createSourceFile("constants.ts", readFileSync("src/utils/constants.ts", "utf8"), ScriptTarget.Latest);
+    const groups = new Set<string>();
 
     for (const child of file.getChildAt(0).getChildren()) {
         if (!isVariableStatement(child)) continue;
 
-        const devsDeclaration = child.declarationList.declarations.find(d => hasName(d, "Devs"));
+        const devsDeclaration = child.declarationList.declarations.find(d => hasName(d, "Devs") || hasName(d, "EquicordDevs"));
         if (!devsDeclaration?.initializer || !isCallExpression(devsDeclaration.initializer)) continue;
 
+        const groupName = hasName(devsDeclaration, "Devs") ? "Devs" : "EquicordDevs";
         const value = devsDeclaration.initializer.arguments[0];
 
-        if (!isSatisfiesExpression(value) || !isObjectLiteralExpression(value.expression)) throw new Error("Failed to parse devs: not an object literal");
+        if (!isSatisfiesExpression(value) || !isObjectLiteralExpression(value.expression)) throw new Error(`Failed to parse ${groupName}: not an object literal`);
 
         for (const prop of value.expression.properties) {
             const name = (prop.name as Identifier).text;
             const value = isPropertyAssignment(prop) ? prop.initializer : prop;
 
-            if (!isObjectLiteralExpression(value)) throw new Error(`Failed to parse devs: ${name} is not an object literal`);
+            if (!isObjectLiteralExpression(value)) throw new Error(`Failed to parse ${groupName}: ${name} is not an object literal`);
 
-            devs[name] = {
+            devs[`${groupName}.${name}`] = {
                 name: (getObjectProp(value, "name") as StringLiteral).text,
                 id: (getObjectProp(value, "id") as BigIntLiteral).text.slice(0, -1)
             };
         }
 
-        return;
+        groups.add(groupName);
     }
 
-    throw new Error("Could not find Devs constant");
+    if (!groups.has("Devs") || !groups.has("EquicordDevs")) throw new Error("Could not find both Devs and EquicordDevs constants");
 }
 
 async function parseFile(fileName: string) {
@@ -136,9 +138,18 @@ async function parseFile(fileName: string) {
                 case "authors":
                     if (!isArrayLiteralExpression(value)) throw fail("authors is not an array literal");
                     data.authors = value.elements.map(e => {
+                        // Collective credits need no fabricated Discord account.
+                        if (isObjectLiteralExpression(e)) {
+                            const name = getObjectProp(e, "name");
+                            const id = getObjectProp(e, "id");
+                            if (!name || !isStringLiteral(name) || !id || id.kind !== SyntaxKind.BigIntLiteral)
+                                throw fail("inline author must have a string name and bigint id");
+                            return { name: name.text, id: (id as BigIntLiteral).text.slice(0, -1) };
+                        }
                         if (!isPropertyAccessExpression(e)) throw fail("authors array contains non-property access expressions");
-                        const d = devs[getName(e)!];
-                        if (!d) throw fail(`couldn't look up author ${getName(e)}`);
+                        const group = isIdentifier(e.expression) ? e.expression.text : "Devs";
+                        const d = devs[`${group}.${getName(e)}`];
+                        if (!d) throw fail(`couldn't look up author ${group}.${getName(e)}`);
                         return d;
                     });
                     break;
@@ -213,7 +224,7 @@ function isPluginFile({ name }: { name: string; }) {
     const plugins = [] as PluginData[];
     const readmes = {} as Record<string, string>;
 
-    await Promise.all(["src/plugins", "src/plugins/_core"].flatMap(dir =>
+    await Promise.all(["src/plugins", "src/plugins/_core", "src/equicordplugins"].flatMap(dir =>
         readdirSync(dir, { withFileTypes: true })
             .filter(isPluginFile)
             .map(async dirent => {
@@ -232,3 +243,4 @@ function isPluginFile({ name }: { name: string; }) {
         console.log(data);
     }
 })();
+

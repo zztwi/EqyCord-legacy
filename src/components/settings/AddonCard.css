@@ -60,7 +60,7 @@
 }
 
 .vc-addon-author::before {
-    content: "by ";
+    content: "By ";
 }
 
 .vc-addon-title-container {

@@ -23,3 +23,7 @@ src/userplugins
 
 ExtensionCache/
 /settings
+/work/
+services/profile-api/.wrangler/
+services/profile-api/.dev.vars
+services/profile-api/.env*

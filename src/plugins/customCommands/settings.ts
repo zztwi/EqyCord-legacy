@@ -14,6 +14,7 @@ import { SettingsTagList } from "./SettingsTagList";
 export const settings = definePluginSettings({
     tagsList: {
         type: OptionType.CUSTOM,
+        description: "The custom commands and their saved messages.",
         default: {} as Record<string, Tag>,
     },
     tagComponent: {
@@ -28,11 +29,11 @@ export interface Tag {
 }
 
 export function getTags() {
-    return Object.values(settings.store.tagsList);
+    return Object.values(settings.store.tagsList) as Tag[];
 }
 
-export function getTag(name: string) {
-    return settings.store.tagsList[name];
+export function getTag(name: string): Tag | undefined {
+    return (settings.store.tagsList as Record<string, Tag>)[name];
 }
 
 export function addTag(tag: Tag) {

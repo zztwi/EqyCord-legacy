@@ -55,6 +55,23 @@ const TrustedRolesIds = [
 
 const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
 
+interface ClientData {
+    name: string;
+    version?: string | null;
+    info?: string | boolean | null;
+    shortHash?: string | null;
+    hash?: string | null;
+    dev?: boolean | null;
+}
+
+export function detectClient(): ClientData {
+    if (typeof DiscordNative !== "undefined") {
+        return { name: "Discord Desktop", version: DiscordNative.app.getVersion() };
+    }
+
+    return { name: "Web", info: navigator.userAgent };
+}
+
 const isSupportAllowedChannel = (channel: Channel) => channel.parent_id === SUPPORT_CATEGORY_ID || AdditionalAllowedChannelIds.includes(channel.id);
 
 async function forceUpdate() {

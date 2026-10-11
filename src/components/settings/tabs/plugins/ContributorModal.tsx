@@ -8,14 +8,14 @@ import "./ContributorModal.css";
 
 import { useSettings } from "@api/Settings";
 import { Link } from "@components/Link";
-import { DevsById } from "@utils/constants";
+import { DevsById, EqyCordAuthor } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { fetchUserProfile } from "@utils/discord";
 import { classes, pluralise } from "@utils/misc";
 import { RenderModalProps, User } from "@vencord/discord-types";
 import { Forms, Modal, openModal, showToast, useEffect, useMemo, UserProfileStore, useStateFromStores } from "@webpack/common";
 
-import Plugins from "~plugins";
+import Plugins, { PluginMeta } from "~plugins";
 
 import { PluginCard } from "./PluginCard";
 import { GithubButton, WebsiteButton } from "./PluginModalButtons";
@@ -41,7 +41,9 @@ function ContributorModal({ user, modalProps }: { user: User; modalProps: Render
 
     const plugins = useMemo(() => {
         const allPlugins = Object.values(Plugins);
-        const pluginsByAuthor = DevsById[user.id]
+        const pluginsByAuthor = user.id === String(EqyCordAuthor.id)
+            ? allPlugins.filter(p => PluginMeta[p.name]?.folderName?.startsWith("src/equicordplugins/"))
+            : DevsById[user.id]
             ? allPlugins.filter(p => p.authors.includes(DevsById[user.id]))
             : allPlugins.filter(p => p.authors.some(a => a.name === user.username));
 

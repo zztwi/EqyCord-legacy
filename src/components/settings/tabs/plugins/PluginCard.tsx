@@ -9,9 +9,12 @@ import { hasAnyVisibleSettings, isPluginEnabled, pluginRequiresRestart, startDep
 import { Settings } from "@api/Settings";
 import { CogWheel, InfoIcon } from "@components/Icons";
 import { AddonCard } from "@components/settings/AddonCard";
+import { getPluginDisplayName, getPluginDisplayText, getPluginOrigin } from "@shared/eqyPluginOrigins";
 import { Plugin } from "@utils/types";
 import { ToastPosition } from "@vencord/discord-types/enums";
 import { React, showToast } from "@webpack/common";
+
+import { PluginMeta } from "~plugins";
 
 import { cl, logger } from ".";
 import { openPluginModal } from "./PluginModal";
@@ -25,6 +28,9 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
 
 export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
     const settings = Settings.plugins[plugin.name];
+    // Individual authors remain in plugin details and original sources.
+    const origin = getPluginOrigin(plugin.name, PluginMeta[plugin.name]?.userPlugin, PluginMeta[plugin.name]?.folderName);
+    const displayName = getPluginDisplayName(plugin.name, origin);
 
     const isEnabled = () => isPluginEnabled(plugin.name);
 
@@ -67,7 +73,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
         if (!result) {
             settings.enabled = false;
 
-            const msg = `Error while ${wasEnabled ? "stopping" : "starting"} plugin ${plugin.name}`;
+            const msg = `Error while ${wasEnabled ? "stopping" : "starting"} plugin ${displayName}`;
             showToast(msg, "failure", { position: ToastPosition.BOTTOM });
 
             return;
@@ -78,8 +84,13 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
 
     return (
         <AddonCard
-            name={plugin.name}
-            description={plugin.description}
+            name={displayName}
+            description={getPluginDisplayText(plugin.description, origin)}
+            author={(
+                <span title={origin === "Community" ? "See plugin source for license" : "GPL-3.0-or-later"}>
+                    <span className={cl("origin", { "origin-eqycord": origin === "EqyCord" })}>{origin}</span>
+                </span>
+            )}
             isNew={isNew}
             enabled={isEnabled()}
             setEnabled={toggleEnabled}

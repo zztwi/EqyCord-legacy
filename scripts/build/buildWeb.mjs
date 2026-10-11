@@ -24,7 +24,7 @@ import { appendFile, mkdir, readdir, readFile, rm, writeFile } from "fs/promises
 import { join } from "path";
 import Zip from "zip-local";
 
-import { BUILD_TIMESTAMP, commonOpts, globPlugins, IS_DEV, IS_REPORTER, IS_ANTI_CRASH_TEST, IS_STANDALONE, VERSION, commonRendererPlugins, buildOrWatchAll, stringifyValues } from "./common.mjs";
+import { BUILD_TIMESTAMP, commonOpts, globPlugins, IS_DEV, IS_REPORTER, IS_ANTI_CRASH_TEST, IS_COMPANION_TEST, IS_EQUIBOP, IS_STANDALONE, VERSION, commonRendererPlugins, buildOrWatchAll, stringifyValues } from "./common.mjs";
 
 /**
  * @type {import("esbuild").BuildOptions}
@@ -48,6 +48,8 @@ const commonOptions = {
         IS_DEV,
         IS_REPORTER,
         IS_ANTI_CRASH_TEST,
+        IS_COMPANION_TEST,
+        IS_EQUIBOP,
         IS_DISCORD_DESKTOP: false,
         IS_VESKTOP: false,
         IS_UPDATER_DISABLED: true,
@@ -146,6 +148,8 @@ async function loadDir(dir, basePath = "") {
  */
 async function buildExtension(target, files) {
     const entries = {
+        "LICENSE.txt": await readFile("LICENSE"),
+        "EQYCORD.md": await readFile("EQYCORD.md"),
         "dist/Vencord.js": await readFile("dist/extension.js"),
         "dist/Vencord.css": await readFile("dist/extension.css"),
         ...await loadDir("dist/vendor/monaco", "dist/"),

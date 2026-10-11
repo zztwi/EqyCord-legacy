@@ -1,3 +1,22 @@
+# EqyCord
+
+Download official builds from [EqyCord releases](https://github.com/zztwi/EqyCord-releases/releases/latest). Development is maintained in a private repository. Each distributed release includes its corresponding GPL source as `EqyCord-source.zip`; development privacy does not restrict recipients' GPL rights. Personal plugins use the source-build model described in [CUSTOM-PLUGINS.md](./CUSTOM-PLUGINS.md). Older installers need the new public-channel installer once.
+
+> **Compiled development preview — live Discord compatibility remains unverified.**
+>
+> EqyCord is an independent, unofficial Discord client modification that keeps
+> Vencord's plugin collection and includes Equicord's plugin collection, with
+> original source and author credits preserved. See [EQYCORD.md](./EQYCORD.md)
+> for attribution, compatibility notes and development status.
+>
+> See [EQYCORD.md](./EQYCORD.md) for current features, limitations, source
+> attribution, and development status. **Do not use the upstream Vencord
+> download link below expecting an EqyCord installer.**
+
+---
+
+## Original Vencord documentation (preserved)
+
 # Vencord
 
 ![](https://img.shields.io/github/package-json/v/Vendicated/Vencord?style=for-the-badge&logo=github&logoColor=d3869b&label=&color=1d2021&labelColor=282828)

@@ -13,7 +13,7 @@ import unusedImports from "eslint-plugin-unused-imports";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-    { ignores: ["dist", "browser", "packages/vencord-types"] },
+    { ignores: ["dist", "browser", "packages/vencord-types", "work", "services/profile-api/.wrangler"] },
     {
         files: ["src/**/*.{tsx,ts,mts,mjs,js,jsx}", "eslint.config.mjs"],
         settings: {
@@ -67,7 +67,7 @@ export default tseslint.config(
             "simple-header/header": [
                 "error",
                 {
-                    "files": ["scripts/header-new.txt", "scripts/header-old.txt"],
+                    "files": ["scripts/header-new.txt", "scripts/header-old.txt", "scripts/header-eqycord.txt"],
                     "templates": { "author": [".*", "Vendicated and contributors"] }
                 }
             ],
@@ -144,6 +144,15 @@ export default tseslint.config(
             "simple-import-sort/exports": "error",
             "unused-imports/no-unused-imports": "error",
             "path-alias/no-relative": "error"
+        }
+    },
+    {
+        files: ["src/equicordplugins/**/*.{tsx,ts,mts,mjs,js,jsx}"],
+        rules: {
+            // Equicord keeps relative imports within each plugin; its upstream
+            // lint configuration intentionally allows this convention.
+            "path-alias/no-relative": "off",
+            "no-useless-escape": "off"
         }
     }
 );

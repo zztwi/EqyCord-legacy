@@ -80,7 +80,7 @@ interface SettingsLayoutBuilder {
 const settings = definePluginSettings({
     settingsLocation: {
         type: OptionType.SELECT,
-        description: "Where to put the Vencord settings section",
+        description: "Where to put the EqyCord settings section",
         options: [
             { label: "At the very top", value: "top" },
             { label: "Above the Nitro section", value: "aboveNitro", default: true },
@@ -170,8 +170,8 @@ export default definePlugin({
         const vencordEntries: SettingsLayoutNode[] = [
             buildEntry({
                 key: "vencord_main",
-                title: "Vencord",
-                panelTitle: "Vencord Settings",
+                title: "EqyCord",
+                panelTitle: "EqyCord Settings",
                 Component: VencordTab,
                 Icon: MainSettingsIcon
             }),
@@ -187,17 +187,17 @@ export default definePlugin({
                 Component: ThemesTab,
                 Icon: PaintbrushIcon
             }),
-            !IS_UPDATER_DISABLED && UpdaterTab && buildEntry({
+            UpdaterTab && buildEntry({
                 key: "vencord_updater",
                 title: "Updater",
-                panelTitle: "Vencord Updater",
+                panelTitle: "EqyCord Updater",
                 Component: UpdaterTab,
                 Icon: UpdaterIcon
             }),
             buildEntry({
                 key: "vencord_cloud",
                 title: "Cloud",
-                panelTitle: "Vencord Cloud",
+                panelTitle: "EqyCord Cloud",
                 Component: CloudTab,
                 Icon: CloudIcon
             }),
@@ -231,7 +231,7 @@ export default definePlugin({
         const vencordSection: SettingsLayoutNode = {
             key: "vencord_section",
             type: LayoutTypes.SECTION,
-            useTitle: () => "Vencord Settings",
+            useTitle: () => "EqyCord Settings",
             buildLayout: () => vencordEntries
         };
 
@@ -290,7 +290,7 @@ export default definePlugin({
     getInfoRows() {
         const { electronVersion, chromiumVersion, additionalInfo } = this;
 
-        const rows = [`Vencord ${gitHash}${additionalInfo}`];
+        const rows = [`EqyCord ${gitHash}${additionalInfo}`];
 
         if (electronVersion) rows.push(`Electron ${electronVersion}`);
         if (chromiumVersion) rows.push(`Chromium ${chromiumVersion}`);

@@ -35,9 +35,10 @@ function BackupAndRestoreTab() {
                 </Card>
 
                 <Text variant="text-md/normal" className={Margins.bottom8}>
-                    You can import and export your Vencord settings as a JSON file.
+                    Import and export EqyCord settings using the Vencord-compatible JSON format.
                     This allows you to easily transfer your settings to another device,
-                    or recover your settings after reinstalling Vencord or Discord.
+                    or recover your settings after reinstalling EqyCord or Discord.
+                    Unknown plugin settings are preserved; a backup contains options, not plugin code.
                 </Text>
 
                 <Heading tag="h4">Settings Export contains:</Heading>
@@ -53,7 +54,7 @@ function BackupAndRestoreTab() {
                     <Button onClick={() => uploadSettingsBackup()}>
                         Import Settings
                     </Button>
-                    <Button onClick={downloadSettingsBackup}>
+                    <Button onClick={() => downloadSettingsBackup()}>
                         Export Settings
                     </Button>
                 </Flex>

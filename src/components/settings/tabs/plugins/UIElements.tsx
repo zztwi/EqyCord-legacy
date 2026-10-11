@@ -14,6 +14,7 @@ import { Card } from "@components/Card";
 import { PlaceholderIcon } from "@components/Icons";
 import { Paragraph } from "@components/Paragraph";
 import { Switch } from "@components/Switch";
+import { getPluginDisplayName } from "@shared/eqyPluginOrigins";
 import { classNameFactory } from "@utils/css";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
@@ -61,7 +62,7 @@ function Section(props: {
         return (
             <Paragraph size="md" weight="semibold" key={name} className={cl("switches-row")}>
                 <Icon height={20} width={20} />
-                {name}
+                {getPluginDisplayName(name, "EqyCord")}
                 <Switch
                     checked={settings[name]?.enabled ?? true}
                     onChange={v => {

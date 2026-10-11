@@ -1,0 +1,59 @@
+.eqy-effect-settings {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    color: var(--text-default, #f2f3f5);
+    font-family: inherit;
+}
+
+.eqy-effect-settings > div {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+.eqy-effect-settings input,
+.eqy-effect-settings button {
+    padding: 8px 12px;
+    color: inherit;
+    background: var(--background-base-lowest, #1e1f22);
+    border: 1px solid var(--border-subtle, #41434a);
+    border-radius: 6px;
+    font: inherit;
+}
+
+.eqy-effect-settings button {
+    cursor: pointer;
+}
+
+.eqy-effect-settings button:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.eqy-effect-settings :focus-visible {
+    outline: 2px solid var(--brand-500, #5865f2);
+    outline-offset: 2px;
+}
+
+.eqy-media-control {
+    box-sizing: border-box;
+    flex: 0 0 24px;
+    width: 24px !important;
+    min-width: 24px !important;
+    max-width: 24px;
+    height: 32px;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 4px;
+}
+
+.eqy-media-control svg {
+    width: 18px;
+    height: 18px;
+}
+
+.eqy-media-control:focus-visible {
+    outline: 2px solid var(--brand-500, #5865f2);
+    outline-offset: 1px;
+}

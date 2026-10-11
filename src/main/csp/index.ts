@@ -28,6 +28,8 @@ export const CspPolicies: PolicyMap = {
     "*.github.io": ImageAndCssSrc, // GitHub pages, used by most themes
     "github.com": ImageAndCssSrc, // GitHub content (stuff uploaded to markdown forms), used by most themes
     "raw.githubusercontent.com": ImageAndCssSrc, // GitHub raw, used by some themes
+    "github.com/Equicord/Equibored/raw/": ["media-src"], // Imported plugin sound assets
+    "raw.githubusercontent.com/Equicord/Equibored/": ["media-src"], // Sound asset redirect destination
     "*.gitlab.io": ImageAndCssSrc, // GitLab pages, used by some themes
     "gitlab.com": ImageAndCssSrc, // GitLab raw, used by some themes
     "*.codeberg.page": ImageAndCssSrc, // Codeberg pages, used by some themes
@@ -53,6 +55,7 @@ export const CspPolicies: PolicyMap = {
 
     // Function Specific
     "api.github.com": ConnectSrc, // used for updating Vencord itself
+    "https://eqycord-profiles.zz0009cx0.workers.dev": ConnectSrc, // EqyCord authenticated cosmetic profiles
     "ws.audioscrobbler.com": ConnectSrc, // Last.fm API
     "musicbrainz.org": ConnectSrc,
     "*.listenbrainz.org": ConnectSrc,
@@ -60,6 +63,8 @@ export const CspPolicies: PolicyMap = {
     "archive.org": ConnectSrc,
     "*.archive.org": ConnectSrc,
     "translate-pa.googleapis.com": ConnectSrc, // Google Translate API
+    "translate.googleapis.com": ConnectSrc, // MessageTranslate and Translate+
+    "aiapi.serversmp.xyz": ConnectSrc, // Optional Translate+ Toki Pona provider
     "*.vencord.dev": ImageSrc, // VenCloud (api.vencord.dev) and Badges (badges.vencord.dev)
     "manti.vendicated.dev": ImageSrc, // ReviewDB API
     "decor.fieryflames.dev": ConnectSrc, // Decor API

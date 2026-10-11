@@ -1,0 +1,9 @@
+/*
+ * EqyCord, a Discord client mod based on Vencord
+ * Copyright (c) 2026 EqyCord contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+.eqycord-settings-tab .vc-addon-card {
+    border-radius: 12px;
+}

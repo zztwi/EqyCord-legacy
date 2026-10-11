@@ -1,0 +1,3 @@
+EqyCord, a Discord client mod based on Vencord
+Copyright (c) {year} {author}
+SPDX-License-Identifier: GPL-3.0-or-later

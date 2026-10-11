@@ -17,7 +17,7 @@
 */
 
 import type { MessageObject } from "@api/MessageEvents";
-import type { Channel, CloudUpload, Guild, GuildFeatures, MediaModalItem, MediaModalProps, Message, User } from "@vencord/discord-types";
+import type { BasicGuild, Channel, CloudUpload, Guild, GuildFeatures, GuildProfile, MediaModalItem, MediaModalProps, Message, User } from "@vencord/discord-types";
 import { ChannelActionCreators, ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, i18n, InviteActions, MessageActions, openMediaModal, openUserProfileModal, RestAPI, SelectedChannelStore, SelectedGuildStore, showToast, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Except } from "type-fest";
 
@@ -90,8 +90,8 @@ export function getCurrentGuild(): Guild | undefined {
     return GuildStore.getGuild(getCurrentChannel()?.guild_id!);
 }
 
-export function openPrivateChannel(userId: string) {
-    ChannelActionCreators.openPrivateChannel(userId);
+export function openPrivateChannel(userId: string, navigateToChannel = true) {
+    return ChannelActionCreators.openPrivateChannel({ recipientIds: [userId], navigateToChannel });
 }
 
 export const enum Theme {
@@ -119,7 +119,7 @@ export async function copyWithToast(text: string, toastMessage = "Copied to clip
     showToast(toastMessage, "success");
 }
 
-interface MessageOptions {
+export interface MessageOptions {
     messageReference: Message["messageReference"];
     allowedMentions: {
         parse: string[];
@@ -200,9 +200,9 @@ interface FetchUserProfileOptions {
 /**
  * Fetch a user's profile
  */
-export async function fetchUserProfile(id: string, options?: FetchUserProfileOptions) {
+export async function fetchUserProfile(id: string, options?: FetchUserProfileOptions, cache = true) {
     const cached = UserProfileStore.getUserProfile(id);
-    if (cached) return cached;
+    if (cached && cache) return cached;
 
     FluxDispatcher.dispatch({ type: "USER_PROFILE_FETCH_START", userId: id });
 
@@ -232,7 +232,7 @@ export function getUniqueUsername(user: User) {
 }
 
 // Discord has a similar function in their code
-export function getGuildAcronym(guild: Guild): string {
+export function getGuildAcronym(guild: Guild | BasicGuild | GuildProfile): string {
     return guild.name
         .replaceAll("'s ", " ")
         .replace(/\w+/g, m => m[0])
