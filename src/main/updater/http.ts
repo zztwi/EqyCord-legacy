@@ -16,9 +16,9 @@ import gitHash from "~git-hash";
 
 import { serializeErrors, VENCORD_FILES } from "./common";
 
-const REPO = "zztwi/EqyCord";
+const REPO = "zztwi/EqyCord-releases";
 const API_BASE = `https://api.github.com/repos/${REPO}`;
-interface Manifest { commit: string; files: Record<string, string>; }
+interface Manifest { commit: string; ancestors: string[]; files: Record<string, string>; }
 let pending: { manifest: Manifest; urls: Record<string, string>; } | undefined;
 const digest = (data: Buffer) => createHash("sha256").update(data).digest("hex");
 async function githubGet(endpoint: string) {
@@ -41,9 +41,10 @@ async function fetchUpdates() {
     const manifest = await fetchJson<Manifest>(urls["eqycord-update.json"], { signal: AbortSignal.timeout(20000) });
     if (!/^[a-f0-9]{40}$/.test(manifest.commit) || !VENCORD_FILES.every(name => /^[a-f0-9]{64}$/.test(manifest.files?.[name]) && urls[name])) throw new Error("Incomplete release manifest");
     if (manifest.commit.startsWith(gitHash)) return false;
-    const comparison = await githubGet(`/compare/${gitHash}...${manifest.commit}`);
-    if (comparison.status === "behind" || comparison.status === "identical") return false;
-    if (comparison.status !== "ahead") throw new Error("This release does not extend your installed EqyCord build");
+    // Source history is private. The trusted release manifest records its ancestry.
+    if (!/^[a-f0-9]{7,40}$/.test(gitHash) || !Array.isArray(manifest.ancestors) || manifest.ancestors.length > 10000
+        || manifest.ancestors.some(hash => !/^[a-f0-9]{40}$/.test(hash))
+        || !manifest.ancestors.some(hash => hash.startsWith(gitHash))) throw new Error("This release does not extend your installed EqyCord build");
     pending = { manifest, urls };
     return true;
 }

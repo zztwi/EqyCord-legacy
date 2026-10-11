@@ -30,11 +30,12 @@ jobs:
             - run: node scripts/eqycord/release-manifest.mjs
             - name: Publish exact tested build
               env:
-                  GH_TOKEN: ${{ github.token }}
+                  GH_TOKEN: ${{ secrets.EQYCORD_RELEASE_TOKEN }}
               run: |
+                  if [ -z "$GH_TOKEN" ]; then echo "Configure EQYCORD_RELEASE_TOKEN with contents-write access to zztwi/EqyCord-releases before enabling hosted publication."; exit 1; fi
                   tag="eqycord-${GITHUB_SHA:0:8}"
                   git archive --format=zip --output=dist/EqyCord-source.zip HEAD
-                  if gh release view "$tag" >/dev/null 2>&1; then exit 0; fi
-                  gh release create "$tag" --target "$GITHUB_SHA" --title "EqyCord ${GITHUB_SHA:0:8}" --notes "EqyCord client update. Matching source and checksummed update manifest included." --latest dist/patcher.js dist/preload.js dist/renderer.js dist/renderer.css dist/vencordDesktopMain.js dist/vencordDesktopPreload.js dist/vencordDesktopRenderer.js dist/vencordDesktopRenderer.css dist/eqycord-update.json dist/EqyCord-source.zip dist/extension-chrome.zip dist/extension-firefox.zip
+                  if gh release view "$tag" --repo zztwi/EqyCord-releases >/dev/null 2>&1; then exit 0; fi
+                  gh release create "$tag" --repo zztwi/EqyCord-releases --target main --title "EqyCord ${GITHUB_SHA:0:8}" --notes "EqyCord client update. Matching GPL source and checksummed update manifest included. Source development is private." --latest dist/patcher.js dist/preload.js dist/renderer.js dist/renderer.css dist/vencordDesktopMain.js dist/vencordDesktopPreload.js dist/vencordDesktopRenderer.js dist/vencordDesktopRenderer.css dist/eqycord-update.json dist/EqyCord-source.zip dist/extension-chrome.zip dist/extension-firefox.zip
 
 

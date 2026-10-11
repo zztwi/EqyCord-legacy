@@ -1,5 +1,7 @@
 # EqyCord
 
+Download official builds from [EqyCord releases](https://github.com/zztwi/EqyCord-releases/releases/latest). Development is maintained in a private repository. Each distributed release includes its corresponding GPL source as `EqyCord-source.zip`; development privacy does not restrict recipients' GPL rights. Personal plugins use the source-build model described in [CUSTOM-PLUGINS.md](./CUSTOM-PLUGINS.md). Older installers need the new public-channel installer once.
+
 > **Compiled development preview — live Discord compatibility remains unverified.**
 >
 > EqyCord is an independent, unofficial Discord client modification that keeps

@@ -16,13 +16,13 @@ EqyCord keeps the existing plugin cards, toggles, dependency handling, and setti
 
 Backup import/export keeps the Vencord JSON shape: `{ settings: { ... }, quickCss: "..." }`. Import validates the envelope and rejects prototype-related keys while preserving unknown plugin settings for compatibility. A backup contains settings, not plugin code.
 
-Automatic updates are disabled for this fork until an EqyCord release channel is available. The Updater page does not replace this build with an upstream release.
+Official native builds update from the public `zztwi/EqyCord-releases` channel using checksummed release manifests. Development stays in the private `zztwi/EqyCord` repository. The updater validates source ancestry recorded in the trusted release manifest without accessing private Git history. Personal plugins and source-archive builds disable automatic updates so official releases cannot replace those custom builds. See CUSTOM-PLUGINS.md. Older installations need the public-channel installer once; Web packages are replaced manually.
 
 ## Windows install and restore
 
 The distributable EqyCord-Setup.exe supports Stable, PTB, and Canary when the installed client layout is compatible. It includes a private Node.js runtime and stores the client in a permanent per-user build folder; recipients do not need to install Node or retain the download. See WINDOWS-INSTALLER.md for requirements, verification, restoration, and distribution.
 
-The older EqyCord-Windows.cmd developer launcher still requires Node.js 22 or later and its original package folder. Both installers require the selected Discord client to be fully closed, refuse foreign modifications, and support verified restoration.
+The older EqyCord-Windows.cmd developer launcher still requires Node.js 22 or later and its original package folder. The developer injector requires the selected Discord channel to be fully closed. The setup executable closes and restarts that channel automatically for install, repair and restoration. Both refuse foreign modifications and support verified restoration.
 
 ## Source and credits
 

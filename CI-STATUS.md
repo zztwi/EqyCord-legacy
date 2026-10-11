@@ -7,3 +7,5 @@ This is an account restriction, not a test assertion failure. Repository code ca
 Resolve the account's billing restriction in GitHub account settings, then create or update `EQYCORD_HOSTED_CI=true` under repository Settings → Secrets and variables → Actions → Variables. Dispatch test first and inspect its result before dispatching the release workflow. No credentials or payment details belong in source.
 
 Until hosted runners are available, require local `pnpm test`, service TypeScript checks and `pnpm buildWeb` before publishing. The community badge expansion passed all 49 local regression tests, desktop compilation, type/lint/style checks and component preview checks. Service tests use SQLite and mocked OAuth; the component preview uses mocked Discord APIs. These are not hosted-runner results or a live Discord UI test.
+
+The private-development/public-release migration adds local publication documented in RELEASE-PUBLISHING.md. This works without hosted Actions. Hosted cross-repository publication additionally requires EQYCORD_RELEASE_TOKEN; the account billing restriction remains independent of this distribution setup.
